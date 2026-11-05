@@ -248,6 +248,12 @@ image, retains only its installed dependency trees, and rebuilds public packages
 control code, runner runtime, and SDK archives. Record local Docker image IDs
 separately from upstream digests in `casimir/images.lock.json`.
 
+The root `.dockerignore` is an allowlist for the smaller build-agent context.
+For these complete source builds, create a tar context from the clean committed
+revision and pass it on standard input. This keeps the ignore policy unchanged,
+excludes untracked files, and works with both Docker's legacy builder and
+BuildKit.
+
 ### Clean source build, package, and tests
 
 Use Bash, Git, Docker Engine, OpenSSL, and a trusted local Docker operator account.
@@ -263,34 +269,41 @@ set -eu
 test "$(uname -m)" = x86_64
 test -z "$(git status --porcelain)"
 SOURCE_REVISION="$(git rev-parse HEAD)"
+BUILD_CONTEXT_DIR="$(mktemp -d)"
+SOURCE_ARCHIVE="$BUILD_CONTEXT_DIR/source.tar"
+trap 'rm -rf -- "$BUILD_CONTEXT_DIR"' EXIT
+git archive --format=tar "$SOURCE_REVISION" > "$SOURCE_ARCHIVE"
 VERSION=c1.0
 POSTGRES_IMAGE='postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c'
 INGRESS_IMAGE='nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236'
 
 # Install workspace dependencies from the pinned Node base.
 DEPENDENCY_TAG="casimir-c1-dependencies:$SOURCE_REVISION"
-docker build --target tooling -f casimir/mvp-a/Dockerfile -t "$DEPENDENCY_TAG" .
+docker build --target tooling -f casimir/mvp-a/Dockerfile \
+  -t "$DEPENDENCY_TAG" - < "$SOURCE_ARCHIVE"
 DEPENDENCY_ID="$(docker image inspect --format '{{.Id}}' "$DEPENDENCY_TAG")"
 
 # Build the original workspace packages and pack the SDK from this checkout;
 # prepare the fixed reference-app dependency graph and its offline cache.
 PREPARED_TAG="casimir-c1-prepared:$SOURCE_REVISION"
 docker build --build-arg "PREPARATION_BASE=$DEPENDENCY_TAG" \
-  -f casimir/install/Tooling.Dockerfile -t "$PREPARED_TAG" .
+  -f casimir/install/Tooling.Dockerfile -t "$PREPARED_TAG" \
+  - < "$SOURCE_ARCHIVE"
 PREPARED_ID="$(docker image inspect --format '{{.Id}}' "$PREPARED_TAG")"
 
 # Build the selected offline runtime and SDK dependency closure from the same
 # prepared source and committed consumer lock.
 RUNTIME_TOOLCHAIN_TAG="casimir-c1-node-toolchain:$SOURCE_REVISION"
 docker build --build-arg "PREPARATION_BASE=$PREPARED_TAG" \
-  -f casimir/install/RuntimeToolchain.Dockerfile -t "$RUNTIME_TOOLCHAIN_TAG" .
+  -f casimir/install/RuntimeToolchain.Dockerfile -t "$RUNTIME_TOOLCHAIN_TAG" \
+  - < "$SOURCE_ARCHIVE"
 RUNTIME_TOOLCHAIN_ID="$(docker image inspect --format '{{.Id}}' "$RUNTIME_TOOLCHAIN_TAG")"
 
 # Build the source-owned control image from this exact checkout.
 CONTROL_TAG="casimir-c1-control:$SOURCE_REVISION"
 docker build --build-arg "BUILD_BASE=$PREPARED_TAG" \
   --build-arg "RUNTIME_BASE=$RUNTIME_TOOLCHAIN_TAG" \
-  -f casimir/install/Dockerfile -t "$CONTROL_TAG" .
+  -f casimir/install/Dockerfile -t "$CONTROL_TAG" - < "$SOURCE_ARCHIVE"
 CONTROL_ID="$(docker image inspect --format '{{.Id}}' "$CONTROL_TAG")"
 
 # Export the runtime descriptor generated inside the control build for the
@@ -306,11 +319,16 @@ RUNNER_BASE_TAG="casimir-c1-runner-base:$SOURCE_REVISION"
 docker build -f casimir/mvp-a/runner/Dockerfile -t "$RUNNER_BASE_TAG" casimir/mvp-a/runner
 RUNNER_BASE_ID="$(docker image inspect --format '{{.Id}}' "$RUNNER_BASE_TAG")"
 RUNNER_TAG="casimir-c1-runner:$SOURCE_REVISION"
+RUNNER_ARCHIVE="$BUILD_CONTEXT_DIR/runner.tar"
+cp "$SOURCE_ARCHIVE" "$RUNNER_ARCHIVE"
+tar --append --file="$RUNNER_ARCHIVE" casimir/mvp-a/runner/dist
 docker build --build-arg "RUNNER_BASE=$RUNNER_BASE_TAG" \
   --build-arg "RUNTIME_ID=$RUNTIME_ID" \
-  -f casimir/install/Runner.Dockerfile -t "$RUNNER_TAG" .
+  -f casimir/install/Runner.Dockerfile -t "$RUNNER_TAG" \
+  - < "$RUNNER_ARCHIVE"
 RUNNER_ID="$(docker image inspect --format '{{.Id}}' "$RUNNER_TAG")"
 rm -rf casimir/mvp-a/runner/dist
+rm -rf -- "$BUILD_CONTEXT_DIR"
 
 # Preserve the runner identity labels emitted by Runner.Dockerfile:
 # org.casimir.task=mvp-a, org.casimir.distribution=c1, and the generated
