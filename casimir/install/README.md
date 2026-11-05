@@ -341,14 +341,13 @@ docker pull "$INGRESS_IMAGE"
 DATABASE_ID="$(docker image inspect --format '{{.Id}}' "$POSTGRES_IMAGE")"
 INGRESS_ID="$(docker image inspect --format '{{.Id}}' "$INGRESS_IMAGE")"
 
-# Package a product bundle. The output stays outside the source checkout.
+# Package from the verified control image, which contains the clean source and generated SDK/runtime inputs.
 OUTPUT_DIR="$PWD/.local/c1-output"
 mkdir -p "$OUTPUT_DIR"
 SOCKET_GID="$(stat -c '%g' /var/run/docker.sock)"
 docker run --rm --network none \
   --user "$(id -u):$(id -g)" --group-add "$SOCKET_GID" \
   --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-  --mount "type=bind,source=$PWD,target=/src,readonly" \
   --mount "type=bind,source=$OUTPUT_DIR,target=/output" \
   --workdir /src --entrypoint node "$CONTROL_ID" \
   casimir/install/package.mjs "/output/$VERSION" "$VERSION" \
