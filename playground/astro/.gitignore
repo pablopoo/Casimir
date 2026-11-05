@@ -1,0 +1,5 @@
+dist/
+.astro/
+.void/
+.wrangler/
+node_modules/

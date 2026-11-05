@@ -1,0 +1,44 @@
+{
+  "name": "@void/deploy-cloudflare",
+  "version": "1.1.11",
+  "description": "Cloudflare deployment primitives for Void runtimes and deployment adapters.",
+  "homepage": "https://void.cloud",
+  "bugs": {
+    "url": "https://github.com/voidzero-dev/void/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voidzero-dev/void.git",
+    "directory": "packages/deploy-cloudflare"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@void/deploy-core": "workspace:*",
+    "jsonc-parser": "^3.3.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@types/node": "catalog:",
+    "pathslash": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

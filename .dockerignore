@@ -1,0 +1,6 @@
+# The platform builder uses the repository root as its context. Its tooling
+# supplies the Dockerfile on stdin, so the allowlist must live at the root.
+**
+!packages/void/package.json
+!platform/packages/api/container/build-agent.mjs
+!platform/packages/api/container/Dockerfile

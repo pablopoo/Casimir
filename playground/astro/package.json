@@ -1,0 +1,19 @@
+{
+  "name": "playground-astro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro build",
+    "dev": "astro dev"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "catalog:",
+    "astro": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "void": "workspace:*"
+  }
+}

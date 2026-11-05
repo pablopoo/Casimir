@@ -1,0 +1,40 @@
+{
+  "name": "create-void",
+  "version": "1.1.11",
+  "description": "Create a full-stack Void app for Cloudflare Workers.",
+  "homepage": "https://void.cloud",
+  "bugs": {
+    "url": "https://github.com/voidzero-dev/void/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voidzero-dev/void.git",
+    "directory": "packages/create-void"
+  },
+  "bin": {
+    "create-void": "dist/index.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@voidzero-dev/vite-plus-prompts": "catalog:",
+    "pathslash": "catalog:",
+    "picocolors": "^1.1.1",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.21.0"
+  }
+}

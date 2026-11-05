@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path/posix';
+import { test } from 'node:test';
+import { inspectPackage } from './packed-registry.mjs';
+
+function createPackage(t, overrides = {}, includeLicense = true) {
+  const root = mkdtempSync(join(tmpdir(), 'void-packed-metadata-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const directory = join(root, 'package');
+  mkdirSync(directory);
+  const manifest = {
+    name: '@void/test',
+    version: '0.0.0',
+    description: 'A Void test package.',
+    license: 'MIT',
+    homepage: 'https://void.cloud',
+    bugs: { url: 'https://github.com/voidzero-dev/void/issues' },
+    exports: './index.mjs',
+    ...overrides,
+  };
+  writeFileSync(join(directory, 'package.json'), JSON.stringify(manifest));
+  writeFileSync(join(directory, 'index.mjs'), 'export {};\n');
+  if (includeLicense) {
+    writeFileSync(join(directory, 'LICENSE'), 'MIT License\n');
+  }
+  const tarball = join(root, 'package.tgz');
+  execFileSync('tar', ['-czf', tarball, '-C', root, 'package']);
+  return tarball;
+}
+
+test('accepts complete metadata and license in a real package tarball', (t) => {
+  const inspected = inspectPackage(createPackage(t));
+  assert.equal(inspected.manifest.name, '@void/test');
+  assert.match(inspected.integrity, /^sha512-/);
+});
+
+for (const [field, error] of [
+  ['description', /missing package description/],
+  ['license', /package license must be MIT/],
+  ['homepage', /homepage must be an HTTPS URL/],
+  ['bugs', /bugs.url must be an HTTPS URL/],
+]) {
+  test(`rejects a packed manifest missing ${field}`, (t) => {
+    assert.throws(() => inspectPackage(createPackage(t, { [field]: undefined })), error);
+  });
+}
+
+test('rejects blank descriptions and invalid package links', (t) => {
+  for (const overrides of [
+    { description: '  ' },
+    { homepage: 'void.cloud' },
+    { homepage: 'http://void.cloud' },
+    { bugs: { url: 'not a URL' } },
+  ]) {
+    assert.throws(() => inspectPackage(createPackage(t, overrides)));
+  }
+});
+
+test('requires the license file as well as its manifest field', (t) => {
+  assert.throws(() => inspectPackage(createPackage(t, {}, false)), /missing packaged LICENSE/);
+});

@@ -1,0 +1,13 @@
+.git
+.local
+.worktrees
+**/.void
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/.dev.vars
+**/*.pem
+**/*.key
+**/.wrangler
+**/coverage

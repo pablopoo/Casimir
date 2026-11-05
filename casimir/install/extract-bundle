@@ -1,0 +1,29 @@
+#!/bin/sh
+# Verify a separately obtained SHA256 before safely extracting a local bundle.
+set -eu
+[ "$#" -eq 3 ] || { echo 'Usage: extract-bundle ARCHIVE EXPECTED_SHA256 ABSOLUTE_NEW_DIRECTORY' >&2; exit 2; }
+archive=$1; expected=$2; destination=$3
+printf '%s\n' "$expected" | LC_ALL=C grep -Eq '^[a-f0-9]{64}$' || exit 2
+case "$destination" in /*) ;; *) exit 2;; esac
+[ ! -e "$destination" ] && [ ! -L "$destination" ] && [ -f "$archive" ] && [ ! -L "$archive" ] || exit 2
+[ "$(realpath -m -- "$destination")" = "$destination" ] || exit 2
+parent=$(dirname -- "$destination"); staging=$(mktemp -d "$parent/.casimir-extract.XXXXXXXX")
+trap 'rm -rf -- "$staging"' EXIT HUP INT TERM
+cp -- "$archive" "$staging/input"
+actual=$(sha256sum < "$staging/input"); [ "${actual%% *}" = "$expected" ] || { echo 'Archive checksum mismatch' >&2;exit 1; }
+LC_ALL=C tar --quoting-style=escape -tf "$staging/input" > "$staging/names"
+LC_ALL=C tar --quoting-style=escape -tvf "$staging/input" > "$staging/types"
+# Listing and extraction use the same private verified bytes. Reject links,
+# devices, control-character escapes, absolute/traversal paths and duplicates.
+LC_ALL=C awk 'substr($0,1,1)!="-" && substr($0,1,1)!="d" {exit 1}' "$staging/types"
+LC_ALL=C awk '
+{p=$0;sub(/^\.\//,"",p);sub(/\/$/,"",p);if(p=="."||p=="")next;
+ if(p !~ /^[a-zA-Z0-9_@+. /-]+$/ || p ~ /^\// || p ~ /(^|\/)\.\.?($|\/)/ || p ~ /\/\// || seen[p]++)exit 1;
+ count++;if(count>20000)exit 1}
+END {if(count<1)exit 1}' "$staging/names"
+mkdir "$staging/payload"
+(umask 022; tar -xf "$staging/input" -C "$staging/payload" --no-same-owner --no-same-permissions --keep-old-files)
+[ -f "$staging/payload/bundle.json" ] && [ -f "$staging/payload/casimir" ] || exit 1
+mv -T --no-clobber -- "$staging/payload" "$destination"
+[ ! -e "$staging/payload" ] || { echo 'Destination appeared during extraction' >&2;exit 1; }
+printf '%s\n' 'Archive checksum and safe extraction verified; run casimir bundle verify next.'

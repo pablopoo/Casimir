@@ -1,0 +1,221 @@
+import {
+  useActionState,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  VoidActionError,
+  getValidationErrors,
+  interpolateRouteParams,
+  isAbortError,
+  isEqualFormValue,
+  submitAction,
+} from 'void/pages-client';
+import type { ActionUrl, ResolveActionBody, ActionFormOptions } from 'void/routes';
+import { RouterContext } from './context.ts';
+
+type SubmitPayload = FormData | { method: string };
+type UntypedForm = {
+  data: Record<string, unknown>;
+  setData(field: string, value: unknown): void;
+  errors: Record<string, string>;
+  error: VoidActionError | null;
+  pending: boolean;
+  hasChanges: boolean;
+  wasSuccessful: boolean;
+  recentlySuccessful: boolean;
+  post(formData: FormData): void;
+  put(formData: FormData): void;
+  patch(formData: FormData): void;
+  delete(formData: FormData): void;
+  reset(...fields: ReadonlyArray<string>): void;
+  clearErrors(...fields: ReadonlyArray<string>): void;
+  clearError(): void;
+};
+
+// Typed overload — full inference from PageActionMap (requires codegen)
+export function useForm<U extends ActionUrl & string>(
+  url: U,
+  defaults: ResolveActionBody<U>,
+  options?: ActionFormOptions<U>,
+): {
+  data: ResolveActionBody<U>;
+  setData: <K extends keyof ResolveActionBody<U> & string>(
+    field: K,
+    value: ResolveActionBody<U>[K],
+  ) => void;
+  errors: Partial<Record<keyof ResolveActionBody<U> & string, string>>;
+  error: VoidActionError | null;
+  pending: boolean;
+  hasChanges: boolean;
+  wasSuccessful: boolean;
+  recentlySuccessful: boolean;
+  post(formData: FormData): void;
+  put(formData: FormData): void;
+  patch(formData: FormData): void;
+  delete(formData: FormData): void;
+  reset(...fields: ReadonlyArray<keyof ResolveActionBody<U> & string>): void;
+  clearErrors(...fields: ReadonlyArray<keyof ResolveActionBody<U> & string>): void;
+  clearError(): void;
+};
+
+export function useForm(
+  url: string,
+  defaults: Record<string, unknown>,
+  options?: { params?: Record<string, string> },
+): UntypedForm {
+  const router = useContext(RouterContext);
+  const [data, setDataState] = useState<Record<string, unknown>>(() => ({ ...defaults }));
+  const [defaultsState, setDefaultsState] = useState<Record<string, unknown>>(() => ({
+    ...defaults,
+  }));
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [error, setError] = useState<VoidActionError | null>(null);
+  const [wasSuccessful, setWasSuccessful] = useState(false);
+  const [recentlySuccessful, setRecentlySuccessful] = useState(false);
+
+  const defaultsRef = useRef(defaultsState);
+  const dataRef = useRef(data);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hasChanges = useMemo(() => {
+    return Object.keys(defaultsState).some(
+      (key) => !isEqualFormValue(data[key], defaultsState[key]),
+    );
+  }, [data, defaultsState]);
+
+  const setData = useCallback((field: string, value: unknown) => {
+    dataRef.current = { ...dataRef.current, [field]: value };
+    setDataState(dataRef.current);
+  }, []);
+
+  const reset = useCallback((...fields: ReadonlyArray<string>) => {
+    if (fields.length === 0) {
+      dataRef.current = { ...defaultsRef.current };
+    } else {
+      const next = { ...dataRef.current };
+      for (const field of fields) {
+        next[field] = defaultsRef.current[field];
+      }
+      dataRef.current = next;
+    }
+    setDataState(dataRef.current);
+  }, []);
+
+  const clearErrors = useCallback((...fields: ReadonlyArray<string>) => {
+    if (fields.length === 0) {
+      setErrors({});
+    } else {
+      setErrors((prev) => {
+        const next = { ...prev };
+        for (const field of fields) {
+          delete next[field];
+        }
+        return next;
+      });
+    }
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const [, dispatchAction, pending] = useActionState(
+    async (previousSuccessVersion: number, payload: SubmitPayload) => {
+      if (!router) {
+        throw new Error('useForm(): requires the Void Router.');
+      }
+
+      const method = payload instanceof FormData ? 'POST' : payload.method;
+
+      setWasSuccessful(false);
+      setRecentlySuccessful(false);
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+        successTimeoutRef.current = null;
+      }
+      setErrors({});
+      setError(null);
+
+      let result;
+      try {
+        // Params are filled in on submit, so a param that would change the
+        // request path (such as "..") fails this submit, not the page render.
+        result = await submitAction(router, interpolateRouteParams(url, options?.params), {
+          method,
+          data: { ...dataRef.current },
+          _resolveOnShell: true,
+        });
+      } catch (submitError) {
+        if (isAbortError(submitError)) {
+          return previousSuccessVersion;
+        }
+        throw submitError;
+      }
+
+      if (!result.ok) {
+        const validationErrors = getValidationErrors(result.error.body);
+        if (validationErrors) {
+          setErrors(validationErrors);
+        } else {
+          setError(result.error);
+        }
+        return previousSuccessVersion;
+      }
+
+      const nextDefaults = { ...dataRef.current };
+      defaultsRef.current = nextDefaults;
+      setDefaultsState(nextDefaults);
+      setWasSuccessful(true);
+      setRecentlySuccessful(true);
+      successTimeoutRef.current = setTimeout(() => {
+        setRecentlySuccessful(false);
+        successTimeoutRef.current = null;
+      }, 2000);
+      return previousSuccessVersion + 1;
+    },
+    0,
+  );
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+        successTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  const dispatchMethodAction = useCallback(
+    (method: string) => (_formData: FormData) => {
+      dispatchAction({ method });
+    },
+    [dispatchAction],
+  );
+
+  const put = useMemo(() => dispatchMethodAction('PUT'), [dispatchMethodAction]);
+  const patch = useMemo(() => dispatchMethodAction('PATCH'), [dispatchMethodAction]);
+  const deleteAction = useMemo(() => dispatchMethodAction('DELETE'), [dispatchMethodAction]);
+
+  return {
+    data,
+    setData,
+    errors,
+    error,
+    pending,
+    hasChanges,
+    wasSuccessful,
+    recentlySuccessful,
+    post: dispatchAction,
+    put,
+    patch,
+    delete: deleteAction,
+    reset,
+    clearErrors,
+    clearError,
+  };
+}

@@ -1,0 +1,54 @@
+{
+  "name": "@void/solid",
+  "version": "1.1.11",
+  "description": "SolidJS pages, server rendering, forms, and navigation for Void.",
+  "homepage": "https://void.cloud",
+  "bugs": {
+    "url": "https://github.com/voidzero-dev/void/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voidzero-dev/void.git",
+    "directory": "packages/solid"
+  },
+  "files": [
+    "dist",
+    "src/runtime"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/runtime/index.d.mts",
+      "default": "./src/runtime/index.ts"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.mts",
+      "import": "./dist/plugin.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "typecheck": "tsc --noEmit --rootDir ../.."
+  },
+  "dependencies": {
+    "vite-plugin-solid": "^2.11.14"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "pathslash": "catalog:",
+    "solid-js": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "void": "workspace:*"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9.0",
+    "vite": "^8.0.0",
+    "void": "workspace:*"
+  }
+}

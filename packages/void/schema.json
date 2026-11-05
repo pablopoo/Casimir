@@ -1,0 +1,430 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Void Configuration",
+  "description": "Configuration file for void projects (void.json)",
+  "type": "object",
+  "properties": {
+    "casimir": {
+      "type": "object",
+      "properties": { "profile": { "const": "node-sqlite-v1" } },
+      "required": ["profile"],
+      "additionalProperties": false,
+      "description": "Opt into the Casimir native SQLite profile. Requires target node."
+    },
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema URL for IDE support"
+    },
+    "sourceDir": {
+      "type": "string",
+      "pattern": "^(?!/)(?!\\.\\.?$)(?!\\./$)(?!\\.\\./)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\s$)(?!\\s).+$",
+      "description": "Directory containing Void source conventions such as pages, routes, middleware, crons, queues, db, auth.ts, and env.ts. Omit to use the project root."
+    },
+    "target": {
+      "type": "string",
+      "enum": ["cloudflare", "node", "bun", "deno"],
+      "description": "Deploy target runtime. Defaults to \"cloudflare\". Non-CF targets disable bindings (D1, KV, R2, AI) and produce a plain Hono app."
+    },
+    "output": {
+      "type": "string",
+      "enum": ["server", "static"],
+      "description": "Output mode. \"server\" (default) serves all pages dynamically. \"static\" prerenders all pages at build time, writing HTML files to dist/client/."
+    },
+    "auth": {
+      "type": "object",
+      "description": "High-level Better Auth configuration. Use this to select built-in auth providers; use auth.ts for advanced Better Auth options.",
+      "properties": {
+        "providers": {
+          "type": "array",
+          "description": "Auth providers to enable. Include \"email\" for email/password auth. Social providers use standardized env vars like AUTH_GITHUB_CLIENT_ID and AUTH_GITHUB_CLIENT_SECRET.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "email",
+              "apple",
+              "atlassian",
+              "cognito",
+              "discord",
+              "dropbox",
+              "facebook",
+              "figma",
+              "github",
+              "gitlab",
+              "google",
+              "huggingface",
+              "kakao",
+              "kick",
+              "line",
+              "linear",
+              "linkedin",
+              "microsoft",
+              "naver",
+              "notion",
+              "paybin",
+              "paypal",
+              "polar",
+              "railway",
+              "reddit",
+              "roblox",
+              "salesforce",
+              "slack",
+              "spotify",
+              "tiktok",
+              "twitch",
+              "twitter",
+              "vercel",
+              "vk",
+              "zoom"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "head": {
+      "type": "object",
+      "description": "Default <head> tags for all pages. Page-level head() exports override these defaults.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Default page title"
+        },
+        "titleTemplate": {
+          "type": "string",
+          "description": "Title template — %s is replaced with the page title. Example: \"%s | My Site\""
+        },
+        "meta": {
+          "type": "array",
+          "description": "Default meta tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "property": { "type": "string" },
+              "content": { "type": "string" },
+              "charset": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "link": {
+          "type": "array",
+          "description": "Default link tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rel": { "type": "string" },
+              "href": { "type": "string" }
+            },
+            "required": ["rel", "href"],
+            "additionalProperties": { "type": "string" }
+          }
+        },
+        "script": {
+          "type": "array",
+          "description": "Default script tags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "src": { "type": "string" },
+              "innerHTML": { "type": "string" }
+            },
+            "additionalProperties": { "type": "string" }
+          }
+        },
+        "htmlAttrs": {
+          "type": "object",
+          "description": "Attributes to add to the <html> element. Example: { \"lang\": \"en\" }",
+          "additionalProperties": { "type": "string" }
+        },
+        "bodyAttrs": {
+          "type": "object",
+          "description": "Attributes to add to the <body> element",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "routing": {
+      "type": "object",
+      "description": "Routing configuration — headers, redirects, rewrites, fallbacks, revalidation, prerendering.",
+      "properties": {
+        "isr": {
+          "type": "boolean",
+          "description": "Enable inferred ISR caching. Set false to disable ISR and edge prerendering, including per-page prerender and revalidate policies. Does not disable output: static build-time prerendering."
+        },
+        "notFound": {
+          "type": "string",
+          "enum": ["single-page-application", "404-page", "none"],
+          "description": "Override how the asset layer answers a request that matched no asset and no worker route. Void infers \"single-page-application\" when the worker does not own HTML routing; set \"404-page\" for a static-site-generator build so unknown URLs serve 404.html with a real HTTP 404 instead of index.html with a 200. Does not change run_worker_first. Ignored for SvelteKit, Nuxt, Analog, and Astro deploys, which pin not_found_handling to \"none\" because the framework's own worker owns unmatched HTML."
+        },
+        "revalidate": {
+          "description": "Edge caching TTL in seconds. A number sets a global TTL for all SSR pages. An object maps URL patterns to TTLs (first match wins). Set to 0 to disable caching for a path.",
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "object",
+              "patternProperties": {
+                "^(\\/|\\*$)": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "prerender": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^/" },
+          "description": "Explicit paths to prerender at deploy time. Each path must start with \"/\"."
+        },
+        "headers": {
+          "type": "object",
+          "description": "Custom response headers for static assets. Keys are URL patterns (e.g. \"/assets/*\"), values are arrays of \"Name: value\" strings.",
+          "patternProperties": {
+            "^/": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Header strings in \"Name: value\" format"
+            }
+          },
+          "additionalProperties": false
+        },
+        "redirects": {
+          "type": "object",
+          "description": "URL redirects. Keys are source URL patterns (path-only `/path` or host-scoped `https://host/path`); values are destination strings (302) or objects with \"to\" and optional \"status\".",
+          "patternProperties": {
+            "^(/|https://)": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "to": { "type": "string" },
+                    "status": { "type": "integer", "enum": [301, 302, 303, 307, 308] }
+                  },
+                  "required": ["to"],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "revalidateQueryAllowlist": {
+          "type": "object",
+          "description": "Query parameters that are part of the ISR cache key for every request to a matching path. Keys are source URL patterns; values are arrays of query parameter names. All other query parameters are left out of the key. When omitted, ISR drops every query parameter from the cache key.",
+          "patternProperties": {
+            "^(\\/|\\*$)": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "rewrites": {
+          "type": "object",
+          "description": "URL rewrites. Keys are source URL patterns (path-only `/path` or host-scoped `https://host/path`); values are destination paths. Serves content from the destination without changing the browser URL. Destinations must start with \"/\" and must not contain \"?\" — the incoming request's query string is preserved automatically.",
+          "patternProperties": {
+            "^(/|https://)": { "type": "string", "pattern": "^/(?!/)[^?]*$" }
+          },
+          "additionalProperties": false
+        },
+        "fallbacks": {
+          "type": "object",
+          "description": "Fallback rewrites. Same shape as `rewrites`, but only fire when no static asset matched the request. Useful for SPA shells or default-locale catch-alls without pre-empting real routes. Destinations must start with \"/\" and must not contain \"?\".",
+          "patternProperties": {
+            "^(/|https://)": { "type": "string", "pattern": "^/(?!/)[^?]*$" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "inference": {
+      "type": "object",
+      "description": "Inference configuration — bindings, scanDirs, build, outputDir, appType.",
+      "properties": {
+        "bindings": {
+          "type": "object",
+          "description": "Explicitly control inferred Cloudflare bindings. If omitted, bindings are inferred by scanning source files.",
+          "properties": {
+            "db": {
+              "oneOf": [{ "type": "boolean" }, { "type": "string" }],
+              "description": "Enable D1 database binding. `true` uses default name \"DB\", a string sets a custom binding name."
+            },
+            "kv": {
+              "oneOf": [{ "type": "boolean" }, { "type": "string" }],
+              "description": "Enable KV namespace binding. `true` uses default name \"KV\", a string sets a custom binding name."
+            },
+            "storage": {
+              "oneOf": [{ "type": "boolean" }, { "type": "string" }],
+              "description": "Enable R2 bucket binding. `true` uses default name \"STORAGE\", a string sets a custom binding name."
+            },
+            "ai": {
+              "oneOf": [{ "type": "boolean" }, { "type": "string" }],
+              "description": "Enable Workers AI binding. `true` uses default name \"AI\", a string sets a custom binding name."
+            },
+            "email": {
+              "type": "boolean",
+              "description": "Enable email support (used by void/email)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "scanDirs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Directories to scan for binding inference, relative to the project root. Overrides the default scan directories."
+        },
+        "build": {
+          "type": "string",
+          "description": "Custom build command. Overrides the framework preset's default build command."
+        },
+        "outputDir": {
+          "type": "string",
+          "description": "Output directory for static deploys. Relative to project root."
+        },
+        "appType": {
+          "type": "string",
+          "enum": ["spa", "static", "void", "framework"],
+          "description": "App type. If omitted, auto-detected on first deploy."
+        }
+      },
+      "additionalProperties": false
+    },
+    "remote": {
+      "type": "boolean",
+      "description": "Connect to remote D1/KV/R2 bindings during local development. Can also be set via VOID_REMOTE=1 environment variable."
+    },
+    "sandbox": {
+      "description": "Enable Cloudflare Sandboxes. `true` uses the default SANDBOX binding and Node.js environment; an object customizes the Durable Object binding, container image, and instance size.",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "binding": {
+              "type": "string",
+              "description": "Worker binding name for the sandbox Durable Object namespace. Defaults to SANDBOX."
+            },
+            "className": {
+              "type": "string",
+              "description": "Durable Object class name. Defaults to SandboxV1."
+            },
+            "containerName": {
+              "type": "string",
+              "description": "Cloudflare Container application name. Defaults to void-sandbox-v1."
+            },
+            "image": {
+              "type": "string",
+              "description": "Dockerfile path or digest-pinned Cloudflare managed registry image for local and native Cloudflare use."
+            },
+            "imageBuildContext": {
+              "type": "string",
+              "description": "Optional Docker build context path for local development and native Cloudflare deploys."
+            },
+            "platformImage": {
+              "type": "string",
+              "description": "Cloudflare managed registry image pinned by digest, containing the SDK 1.0 sandbox-shim. Defaults to Cloudflare’s managed Node.js image."
+            },
+            "instanceType": {
+              "type": "string",
+              "enum": ["lite", "standard-1", "standard-2", "standard-3", "standard-4"],
+              "description": "Cloudflare Container instance type."
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "worker": {
+      "type": "object",
+      "description": "Curated wrangler config passthrough. Cloudflare-targeted apps require compatibility_date here unless provided by wrangler.jsonc/wrangler.json; Void pins the latest known-good date here if none is configured. Binding arrays (d1_databases, kv_namespaces, r2_buckets) are not allowed here — bindings are fully managed by void.",
+      "properties": {
+        "compatibility_date": {
+          "type": "string",
+          "description": "Cloudflare Workers compatibility date"
+        },
+        "compatibility_flags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Cloudflare Workers compatibility flags"
+        },
+        "vars": {
+          "type": "object",
+          "description": "Environment variables (plain text, not secrets)",
+          "additionalProperties": { "type": "string" }
+        },
+        "limits": {
+          "type": "object",
+          "description": "Worker resource limit overrides.",
+          "properties": {
+            "cpu_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 300000,
+              "description": "Caps Workers CPU time per request, in milliseconds (max 300000 = 5 minutes). The platform plan may cap it lower."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "deploy": {
+      "type": "object",
+      "description": "Void deployment choices. Cloudflare Worker settings belong in cloudflare instead.",
+      "properties": {
+        "cloudflare": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["staged", "atomic"],
+              "description": "Staged is the default and verifies readiness before traffic. Atomic publishes a Durable Object Worker directly and verifies readiness afterward."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "database": {
+      "type": "string",
+      "enum": ["pg", "mysql"],
+      "description": "Database backend. Omit for D1 (SQLite, default). Set to \"pg\" for PostgreSQL or \"mysql\" for MySQL via Hyperdrive."
+    },
+    "ai": {
+      "type": "object",
+      "description": "AI configuration for self-hosted deploys. Configures the Cloudflare AI Gateway used by ai.provider().fetch() (Workers AI ai.run/ai.image use the env.AI binding directly and are not affected).",
+      "properties": {
+        "gateway": {
+          "type": "string",
+          "description": "Cloudflare AI Gateway name/slug to route ai.provider().fetch() through your own account."
+        }
+      },
+      "additionalProperties": false
+    },
+    "email": {
+      "type": "object",
+      "description": "Email configuration for void/email.",
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Default sender for sendEmail(): one address, optionally with a display name (\"Acme <noreply@mail.acme.com>\"). On `void deploy --backend cloudflare` its host is the domain Void sets Email Routing and Email Sending up on."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

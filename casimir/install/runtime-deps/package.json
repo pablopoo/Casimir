@@ -1,0 +1,13 @@
+{
+  "name": "casimir-c1-runtime-dependencies",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "better-sqlite3": "13.0.3",
+    "drizzle-orm": "0.45.4",
+    "pathslash": "0.1.0",
+    "pg": "8.23.1",
+    "undici": "7.29.1",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.2.0"
+  }
+}

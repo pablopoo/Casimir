@@ -1,0 +1,445 @@
+{
+  "name": "void",
+  "version": "1.1.11",
+  "description": "Full-stack framework and deployment CLI for Cloudflare Workers, powered by Vite.",
+  "homepage": "https://void.cloud",
+  "bugs": {
+    "url": "https://github.com/voidzero-dev/void/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voidzero-dev/void.git",
+    "directory": "packages/void"
+  },
+  "bin": {
+    "void": "dist/cli/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "schema.json",
+    "skills",
+    "AGENTS_TEMPLATE.md",
+    "README.md",
+    "sandbox.Dockerfile"
+  ],
+  "type": "module",
+  "imports": {
+    "#self/casimir/db": "./dist/casimir/db.mjs",
+    "#self/casimir/env": "./dist/casimir/env.mjs",
+    "#self/_env": "./dist/runtime/env.mjs",
+    "#self/email": "./dist/runtime/email.mjs",
+    "#self/env": "./dist/runtime/env-public.mjs",
+    "#self/client": "./dist/runtime/client.mjs",
+    "#self/handler": "./dist/runtime/handler.mjs",
+    "#self/queues": "./dist/runtime/queues.mjs",
+    "#self/remote": "./dist/runtime/remote/index.mjs",
+    "#self/remote/binding-handler": "./dist/runtime/remote/binding-handler.mjs",
+    "#self/sandbox": "./dist/runtime/sandbox.mjs",
+    "#self/runtime/live-server": "./dist/runtime/live-server.mjs",
+    "#self/runtime/fetch": "./dist/runtime/fetch.mjs",
+    "#self/runtime/fetch-stream": "./dist/runtime/fetch-stream.mjs",
+    "#self/runtime/route-url": "./dist/runtime/route-url.mjs",
+    "#self/runtime/migration-handler": "./dist/runtime/migration-handler.mjs",
+    "#self/runtime/migration-handler-pg": "./dist/runtime/migration-handler-pg.mjs",
+    "#self/runtime/migration-handler-mysql": "./dist/runtime/migration-handler-mysql.mjs",
+    "#self/runtime/ws-server": "./dist/runtime/ws-server.mjs",
+    "#self/runtime/routing": "./dist/runtime/routing.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.mjs"
+    },
+    "./schema.json": "./schema.json",
+    "./config": {
+      "types": "./dist/config-entry.d.mts",
+      "import": "./dist/config-entry.mjs",
+      "require": "./dist/config-entry.mjs"
+    },
+    "./database-provider": {
+      "types": "./dist/database-provider.d.mts",
+      "import": "./dist/database-provider.mjs",
+      "require": "./dist/database-provider.mjs"
+    },
+    "./edge": {
+      "types": "./dist/edge.d.mts",
+      "import": "./dist/edge.mjs",
+      "require": "./dist/edge.mjs"
+    },
+    "./handler": {
+      "types": "./dist/runtime/handler.d.mts",
+      "import": "./dist/runtime/handler.mjs",
+      "require": "./dist/runtime/handler.mjs"
+    },
+    "./response": {
+      "types": "./dist/runtime/response.d.mts",
+      "import": "./dist/runtime/response.mjs",
+      "require": "./dist/runtime/response.mjs"
+    },
+    "./auth": {
+      "types": "./dist/runtime/auth.d.mts",
+      "import": "./dist/runtime/auth.mjs",
+      "require": "./dist/runtime/auth.mjs"
+    },
+    "./validator": {
+      "types": "./dist/runtime/validator.d.mts",
+      "import": "./dist/runtime/validator.mjs",
+      "require": "./dist/runtime/validator.mjs"
+    },
+    "./routes": {
+      "types": "./dist/routes-stub.d.mts"
+    },
+    "./nitro": {
+      "types": "./dist/nitro.d.mts",
+      "import": "./dist/nitro.mjs",
+      "require": "./dist/nitro.mjs"
+    },
+    "./sveltekit": {
+      "types": "./dist/sveltekit.d.mts",
+      "import": "./dist/sveltekit.mjs",
+      "require": "./dist/sveltekit.mjs"
+    },
+    "./client": {
+      "types": "./dist/runtime/client.d.mts",
+      "import": "./dist/runtime/client.mjs",
+      "require": "./dist/runtime/client.mjs"
+    },
+    "./client/react": {
+      "types": "./dist/runtime/client-react.d.mts",
+      "import": "./dist/runtime/client-react.mjs",
+      "require": "./dist/runtime/client-react.mjs"
+    },
+    "./client/vue": {
+      "types": "./dist/runtime/client-vue.d.mts",
+      "import": "./dist/runtime/client-vue.mjs",
+      "require": "./dist/runtime/client-vue.mjs"
+    },
+    "./client/svelte": {
+      "types": "./dist/runtime/client-svelte.d.mts",
+      "import": "./dist/runtime/client-svelte.mjs",
+      "require": "./dist/runtime/client-svelte.mjs"
+    },
+    "./client/solid": {
+      "types": "./dist/runtime/client-solid.d.mts",
+      "import": "./dist/runtime/client-solid.mjs",
+      "require": "./dist/runtime/client-solid.mjs"
+    },
+    "./sse": {
+      "types": "./dist/runtime/sse.d.mts",
+      "import": "./dist/runtime/sse.mjs",
+      "require": "./dist/runtime/sse.mjs"
+    },
+    "./sse/client": {
+      "types": "./dist/runtime/sse-client.d.mts",
+      "import": "./dist/runtime/sse-client.mjs",
+      "require": "./dist/runtime/sse-client.mjs"
+    },
+    "./live": {
+      "types": "./dist/runtime/live.d.mts",
+      "import": "./dist/runtime/live.mjs",
+      "require": "./dist/runtime/live.mjs"
+    },
+    "./live/client": {
+      "types": "./dist/runtime/live-client.d.mts",
+      "import": "./dist/runtime/live-client.mjs",
+      "require": "./dist/runtime/live-client.mjs"
+    },
+    "./ws": {
+      "types": "./dist/runtime/ws.d.mts",
+      "import": "./dist/runtime/ws.mjs",
+      "require": "./dist/runtime/ws.mjs"
+    },
+    "./db": {
+      "types": "./dist/runtime/db.d.mts",
+      "import": "./dist/runtime/db.mjs",
+      "require": "./dist/runtime/db.mjs"
+    },
+    "./durable": {
+      "types": "./dist/runtime/durable.d.mts",
+      "import": "./dist/runtime/durable.mjs",
+      "require": "./dist/runtime/durable.mjs"
+    },
+    "./seed": {
+      "types": "./dist/runtime/seed.d.mts",
+      "import": "./dist/runtime/seed.mjs",
+      "require": "./dist/runtime/seed.mjs"
+    },
+    "./drizzle-zod": {
+      "types": "./dist/runtime/drizzle-zod.d.mts",
+      "import": "./dist/runtime/drizzle-zod.mjs",
+      "require": "./dist/runtime/drizzle-zod.mjs"
+    },
+    "./drizzle-valibot": {
+      "types": "./dist/runtime/drizzle-valibot.d.mts",
+      "import": "./dist/runtime/drizzle-valibot.mjs",
+      "require": "./dist/runtime/drizzle-valibot.mjs"
+    },
+    "./drizzle-arktype": {
+      "types": "./dist/runtime/drizzle-arktype.d.mts",
+      "import": "./dist/runtime/drizzle-arktype.mjs",
+      "require": "./dist/runtime/drizzle-arktype.mjs"
+    },
+    "./schema-d1": {
+      "types": "./dist/runtime/schema-d1.d.mts",
+      "import": "./dist/runtime/schema-d1.mjs",
+      "require": "./dist/runtime/schema-d1.mjs"
+    },
+    "./schema-pg": {
+      "types": "./dist/runtime/schema-pg.d.mts",
+      "import": "./dist/runtime/schema-pg.mjs",
+      "require": "./dist/runtime/schema-pg.mjs"
+    },
+    "./schema-mysql": {
+      "types": "./dist/runtime/schema-mysql.d.mts",
+      "import": "./dist/runtime/schema-mysql.mjs",
+      "require": "./dist/runtime/schema-mysql.mjs"
+    },
+    "./kv": {
+      "types": "./dist/runtime/kv.d.mts",
+      "import": "./dist/runtime/kv.mjs",
+      "require": "./dist/runtime/kv.mjs"
+    },
+    "./queues": {
+      "types": "./dist/runtime/queues.d.mts",
+      "import": "./dist/runtime/queues.mjs",
+      "require": "./dist/runtime/queues.mjs"
+    },
+    "./storage": {
+      "types": "./dist/runtime/storage.d.mts",
+      "import": "./dist/runtime/storage.mjs",
+      "require": "./dist/runtime/storage.mjs"
+    },
+    "./isr": {
+      "types": "./dist/runtime/isr.d.mts",
+      "import": "./dist/runtime/isr.mjs",
+      "require": "./dist/runtime/isr.mjs"
+    },
+    "./log": {
+      "types": "./dist/runtime/log.d.mts",
+      "import": "./dist/runtime/log.mjs",
+      "require": "./dist/runtime/log.mjs"
+    },
+    "./ai": {
+      "types": "./dist/runtime/ai.d.mts",
+      "import": "./dist/runtime/ai.mjs",
+      "require": "./dist/runtime/ai.mjs"
+    },
+    "./email": {
+      "types": "./dist/runtime/email.d.mts",
+      "import": "./dist/runtime/email.mjs",
+      "require": "./dist/runtime/email.mjs"
+    },
+    "./_email-protocol": {
+      "types": "./dist/runtime/email-protocol.d.mts",
+      "import": "./dist/runtime/email-protocol.mjs",
+      "require": "./dist/runtime/email-protocol.mjs"
+    },
+    "./email/testing": {
+      "types": "./dist/runtime/email/testing.d.mts",
+      "import": "./dist/runtime/email/testing.mjs",
+      "require": "./dist/runtime/email/testing.mjs"
+    },
+    "./sandbox": {
+      "types": "./dist/runtime/sandbox.d.mts",
+      "import": "./dist/runtime/sandbox.mjs",
+      "require": "./dist/runtime/sandbox.mjs"
+    },
+    "./remote": {
+      "types": "./dist/runtime/remote/index.d.mts",
+      "import": "./dist/runtime/remote/index.mjs",
+      "require": "./dist/runtime/remote/index.mjs"
+    },
+    "./pages": {
+      "types": "./dist/pages/index.d.mts",
+      "import": "./dist/pages/index.mjs",
+      "require": "./dist/pages/index.mjs"
+    },
+    "./pages-protocol": {
+      "types": "./dist/pages/protocol.d.mts",
+      "import": "./dist/pages/protocol.mjs",
+      "require": "./dist/pages/protocol.mjs"
+    },
+    "./pages-head": {
+      "types": "./dist/pages/head.d.mts",
+      "import": "./dist/pages/head.mjs",
+      "require": "./dist/pages/head.mjs"
+    },
+    "./pages-prefetch": {
+      "types": "./dist/pages/prefetch.d.mts",
+      "import": "./dist/pages/prefetch.mjs",
+      "require": "./dist/pages/prefetch.mjs"
+    },
+    "./pages-client": {
+      "types": "./dist/pages/client.d.mts",
+      "import": "./dist/pages/client.mjs",
+      "require": "./dist/pages/client.mjs"
+    },
+    "./pages-server": {
+      "types": "./dist/pages/serialize.d.mts",
+      "import": "./dist/pages/serialize.mjs",
+      "require": "./dist/pages/serialize.mjs"
+    },
+    "./pages-islands-plugin": {
+      "types": "./dist/pages/islands-plugin.d.mts",
+      "import": "./dist/pages/islands-plugin.mjs",
+      "require": "./dist/pages/islands-plugin.mjs"
+    },
+    "./env": {
+      "types": "./dist/runtime/env-public.d.mts",
+      "workerd": {
+        "import": "./dist/runtime/env-public.mjs",
+        "require": "./dist/runtime/env-public.mjs"
+      },
+      "worker": {
+        "import": "./dist/runtime/env-public.mjs",
+        "require": "./dist/runtime/env-public.mjs"
+      },
+      "browser": {
+        "import": "./dist/runtime/env-public-client.mjs",
+        "require": "./dist/runtime/env-public-client.mjs"
+      },
+      "default": {
+        "import": "./dist/runtime/env-public.mjs",
+        "require": "./dist/runtime/env-public.mjs"
+      }
+    },
+    "./_env": {
+      "types": "./dist/runtime/env.d.mts",
+      "import": "./dist/runtime/env.mjs",
+      "require": "./dist/runtime/env.mjs"
+    },
+    "./_casimir-db": {
+      "types": "./dist/casimir/db.d.mts",
+      "import": "./dist/casimir/db.mjs"
+    },
+    "./_casimir-env": {
+      "types": "./dist/casimir/env.d.mts",
+      "import": "./dist/casimir/env.mjs"
+    },
+    "./_casimir-migrations": {
+      "types": "./dist/casimir/migrations.d.mts",
+      "import": "./dist/casimir/migrations.mjs"
+    },
+    "./_db": {
+      "types": "./dist/runtime/db.d.mts",
+      "import": "./dist/runtime/db.mjs",
+      "require": "./dist/runtime/db.mjs"
+    },
+    "./_db-pg": {
+      "types": "./dist/runtime/db-pg.d.mts",
+      "import": "./dist/runtime/db-pg.mjs",
+      "require": "./dist/runtime/db-pg.mjs"
+    },
+    "./_db-mysql": {
+      "types": "./dist/runtime/db-mysql.d.mts",
+      "import": "./dist/runtime/db-mysql.mjs",
+      "require": "./dist/runtime/db-mysql.mjs"
+    },
+    "./_sandbox-container": {
+      "types": "./dist/runtime/sandbox-container.d.mts",
+      "import": "./dist/runtime/sandbox-container.mjs"
+    },
+    "./limits": {
+      "types": "./dist/runtime/limits.d.mts",
+      "import": "./dist/runtime/limits.mjs",
+      "require": "./dist/runtime/limits.mjs"
+    },
+    "./deploy": {
+      "types": "./dist/deploy.d.mts",
+      "import": "./dist/deploy.mjs"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/sync-docs.mjs && vp pack",
+    "dev": "vp pack --watch",
+    "typecheck": "tsc --noEmit --rootDir ../.."
+  },
+  "dependencies": {
+    "@cloudflare/build-output-utils": "catalog:",
+    "@cloudflare/codemods": "catalog:",
+    "@cloudflare/config": "catalog:",
+    "@cloudflare/sandbox": "^1.0.1",
+    "@cloudflare/vite-plugin": "catalog:",
+    "@cloudflare/workers-auth": "catalog:",
+    "@cloudflare/workers-types": "catalog:",
+    "@napi-rs/keyring": "^2.1.1",
+    "@void/deploy-cloudflare": "workspace:*",
+    "@void/deploy-core": "workspace:*",
+    "@void/edge": "workspace:*",
+    "@void/isr": "workspace:*",
+    "@void/platform": "workspace:*",
+    "better-auth": "^1.7.7",
+    "better-sqlite3": "^13.0.3",
+    "blake3-jit": "^1.1.0",
+    "cf": "catalog:",
+    "drizzle-arktype": "^0.1.3",
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
+    "drizzle-valibot": "^0.4.2",
+    "drizzle-zod": "^0.8.3",
+    "email-validator": "^2.0.4",
+    "hono": "^4.13.13",
+    "ignore": "^7.0.12",
+    "jiti": "^2.7.0",
+    "jsonc-parser": "^3.3.1",
+    "mime": "^4.1.1",
+    "miniflare": "catalog:",
+    "minimatch": "^10.2.6",
+    "mysql2": "^3.24.6",
+    "pg": "^8.23.1",
+    "postal-mime": "catalog:",
+    "proper-lockfile": "^4.1.2",
+    "terminal-link": "^5.0.0",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "catalog:",
+    "@types/pg": "^8.23.1",
+    "@types/proper-lockfile": "^4.1.4",
+    "@voidzero-dev/vite-plus-prompts": "catalog:",
+    "arktype": "^2.2.8",
+    "ci-info": "^4.4.0",
+    "estree-walker": "^3.0.3",
+    "fast-wrap-ansi": "^0.2.2",
+    "magic-string": "catalog:",
+    "ofetch": "2.0.0-alpha.3",
+    "pathslash": "catalog:",
+    "pglite-server": "0.1.5",
+    "picocolors": "^1.1.1",
+    "tinyglobby": "^0.2.17",
+    "typescript": "catalog:",
+    "valibot": "^1.5.0",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "zod": "^4.6.7"
+  },
+  "peerDependencies": {
+    "@void/md": "workspace:*",
+    "arktype": ">=2.0.0",
+    "valibot": ">=1.0.0-beta.7",
+    "vite": "^8.0.0",
+    "zod": "^3.25.0 || ^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@void/md": {
+      "optional": true
+    },
+    "arktype": {
+      "optional": true
+    },
+    "valibot": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.21.0"
+  }
+}

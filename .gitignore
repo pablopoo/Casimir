@@ -1,0 +1,45 @@
+node_modules
+dist
+.void
+.vite-cloud
+*.tsbuildinfo
+.DS_Store
+.wrangler
+.void-wrangler.jsonc
+.env
+.claude
+plan.md
+TODOs.md
+.dev.vars
+*.local
+.pnpm-store
+.codex
+.vitepress/cache
+playground/*/.node-version
+.tanstack
+.worktrees
+playground-local
+.svelte-kit/
+.next/
+next-env.d.ts
+docs/superpowers/
+
+# Local operator material must never be committed.
+.local/
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.backup
+*.dump
+*.sqlite
+*.sqlite3
+private/
+backups/
+
+# Test temp dirs (unique per test; a Windows run may leave one behind when the OS has not
+# yet unmapped a terminated child process image — see provision.test.ts teardown).
+**/.tmp-*

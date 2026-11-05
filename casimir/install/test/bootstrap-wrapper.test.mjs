@@ -1,0 +1,26 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, writeFile, copyFile, chmod, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+test('bootstrap_verifies_before_load_and_full_verifier_before_other_images',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'casimir bootstrap ')); t.after(()=>rm(dir,{recursive:true,force:true}));
+ await mkdir(join(dir,'images')); await mkdir(join(dir,'bin'));
+ const wrapper=new URL('../casimir',import.meta.url);
+ await assert.doesNotReject(()=>copyFile(wrapper,join(dir,'casimir')),'wrapper contract missing');
+ await chmod(join(dir,'casimir'),0o755);
+ const payload='lifecycle image'; const hash=createHash('sha256').update(payload).digest('hex');
+ await writeFile(join(dir,'images/lifecycle.tar.gz'),payload);
+ await writeFile(join(dir,'bootstrap.txt'),`${hash}\nsha256:${'a'.repeat(64)}\n`);
+ const log=join(dir,'calls');
+ await writeFile(join(dir,'bin/docker'),'#!/bin/sh\nprintf "%s\\n" "$*" >> "$CALL_LOG"\nexit 0\n'); await chmod(join(dir,'bin/docker'),0o755);
+ const env={...process.env,PATH:join(dir,'bin')+':'+process.env.PATH,CALL_LOG:log};
+ const run=()=>spawnSync(join(dir,'casimir'),['bundle','verify'],{env,encoding:'utf8'});
+ let r=run(); assert.equal(r.status,0,r.stderr || String(r.error));
+ const lines=(await readFile(log,'utf8')).trim().split('\n'); assert.equal(lines.length,3);assert.match(lines[0],/^image inspect /); assert.match(lines[1],/^load /); assert.match(lines[2],/^run .*--network none.*bundle.mjs/);
+ await rm(log);await writeFile(join(dir,'bin/docker'),'#!/bin/sh\nprintf "%s\\n" "$*" >> "$CALL_LOG"\nif [ "$1" = image ]; then printf "%s\\n" "sha256:'+ 'a'.repeat(64)+'"; fi\n');
+ r=run();assert.equal(r.status,0);const cached=(await readFile(log,'utf8')).trim().split('\n');assert.equal(cached.length,2);assert.match(cached[0],/^image inspect /);assert.match(cached[1],/^run /);
+ await rm(log); await writeFile(join(dir,'images/lifecycle.tar.gz'),'corrupt'); r=run(); assert.notEqual(r.status,0); await assert.rejects(()=>readFile(log),{code:'ENOENT'});
+});

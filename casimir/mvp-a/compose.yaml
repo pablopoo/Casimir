@@ -1,0 +1,158 @@
+name: casimir-mvp-a
+x-control: &control
+  image: casimir-mvp-a-control:local
+  pull_policy: never
+  working_dir: /src
+  init: true
+  user: node
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  mem_limit: 512m
+  cpus: 1
+  pids_limit: 128
+  tmpfs: ['/tmp:rw,noexec,nosuid,size=32m']
+x-ingress: &ingress
+  image: nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
+  user: '101:101'
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  mem_limit: 128m
+  cpus: 0.25
+  pids_limit: 64
+  tmpfs: ['/tmp:rw,noexec,nosuid,size=16m']
+services:
+  db:
+    image: postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+    container_name: casimir-mvp-a-db
+    env_file: ../../.local/mvp-a/db.env
+    networks: [runtime]
+    volumes: [database:/var/lib/postgresql]
+    labels: { org.casimir.task: mvp-a, org.casimir.role: database }
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U casimir_mvp_a -d casimir_mvp_a']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  init:
+    <<: *control
+    container_name: casimir-mvp-a-init
+    user: root
+    cap_add: [CHOWN]
+    networks: [runtime]
+    command: [node, casimir/mvp-a/init-volumes.mjs]
+    volumes:
+      [
+        artifacts:/artifacts,
+        runtime-secrets:/runtime,
+        jobs:/jobs,
+        snapshots:/snapshots,
+        appdata:/data,
+        routes:/routes,
+      ]
+    labels: { org.casimir.task: mvp-a, org.casimir.role: init }
+  migrate:
+    <<: *control
+    container_name: casimir-mvp-a-migrate
+    env_file: ../../.local/mvp-a/api.env
+    networks: [runtime]
+    depends_on: { db: { condition: service_healthy } }
+    command:
+      [
+        sh,
+        -ec,
+        'node casimir/migrate.mjs && node casimir/mvp-a/migrate.mjs && node casimir/seed.mjs',
+      ]
+    labels: { org.casimir.task: mvp-a, org.casimir.role: migrate }
+  api:
+    <<: *control
+    container_name: casimir-mvp-a-api
+    env_file: ../../.local/mvp-a/api.env
+    environment: { CASIMIR_MVP_PROFILE: /config/profile.json }
+    networks: [runtime]
+    volumes: ['../../.local/mvp-a/profile.json:/config/profile.json:ro', artifacts:/artifacts]
+    depends_on:
+      {
+        migrate: { condition: service_completed_successfully },
+        init: { condition: service_completed_successfully },
+      }
+    labels: { org.casimir.task: mvp-a, org.casimir.role: api }
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          'fetch("http://127.0.0.1:3000/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))',
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  executor:
+    <<: *control
+    container_name: casimir-mvp-a-executor
+    env_file: ../../.local/mvp-a/executor.env
+    environment:
+      CASIMIR_MVP_PROFILE: /config/profile.json
+      CASIMIR_TEST_FAILPOINT: '${CASIMIR_TEST_FAILPOINT:-}'
+    group_add: ['${CASIMIR_DOCKER_GID:-0}']
+    command: [node, casimir/dist/mvpExecutor.mjs]
+    networks: [runtime, apps]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../../.local/mvp-a/profile.json:/config/profile.json:ro
+      - ../../.local/mvp-a/runner.json:/config/runner.json:ro
+      - ../../.local/mvp-a/runtime-env.json:/config/runtime-env.json:ro
+      - artifacts:/artifacts
+      - routes:/routes
+      - runtime-secrets:/runtime
+      - jobs:/jobs
+    depends_on: { api: { condition: service_healthy }, app-ingress: { condition: service_started } }
+    labels:
+      { org.casimir.task: mvp-a, org.casimir.scope: casimir-mvp-a, org.casimir.role: executor }
+  control-ingress:
+    <<: *ingress
+    container_name: casimir-mvp-a-control-ingress
+    entrypoint: [nginx, -c, /etc/nginx/casimir.conf, -g, 'daemon off;']
+    ports: ['127.0.0.1:4285:8080']
+    networks: [runtime, front]
+    volumes: ['./control.conf:/etc/nginx/casimir.conf:ro']
+    depends_on: { api: { condition: service_healthy } }
+    labels: { org.casimir.task: mvp-a, org.casimir.role: control-ingress }
+  app-ingress:
+    <<: *ingress
+    container_name: casimir-mvp-a-app-ingress
+    entrypoint: [nginx, -c, /routes/route.conf, -g, 'daemon off;']
+    ports: ['127.0.0.1:4286:8080']
+    networks: [apps, front]
+    volumes: [routes:/routes:ro]
+    depends_on: { init: { condition: service_completed_successfully } }
+    labels: { org.casimir.task: mvp-a, org.casimir.role: app-ingress }
+networks:
+  runtime:
+    internal: true
+    labels: { org.casimir.task: mvp-a }
+  apps:
+    internal: true
+    labels: { org.casimir.task: mvp-a }
+  front:
+    labels: { org.casimir.task: mvp-a }
+volumes:
+  database:
+    labels: { org.casimir.task: mvp-a }
+  artifacts:
+    labels: { org.casimir.task: mvp-a }
+  appdata:
+    labels: { org.casimir.task: mvp-a }
+  snapshots:
+    labels: { org.casimir.task: mvp-a }
+  routes:
+    labels: { org.casimir.task: mvp-a }
+  runtime-secrets:
+    labels: { org.casimir.task: mvp-a }
+  jobs:
+    labels: { org.casimir.task: mvp-a }

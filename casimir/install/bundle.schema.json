@@ -1,0 +1,17 @@
+{
+ "$schema":"https://json-schema.org/draft/2020-12/schema",
+ "title":"Casimir experimental C1 offline bundle",
+ "type":"object","additionalProperties":false,
+ "required":["format","version","sourceRevision","platform","runtime","images","sdk","files","controlSchema","upgradeFrom"],
+ "properties":{
+  "format":{"const":1},"version":{"type":"string","pattern":"^c1\\.[0-9]+$"},"sourceRevision":{"type":"string","pattern":"^[a-f0-9]{40}$"},"platform":{"const":"linux/amd64"},
+  "runtime":{"type":"object","additionalProperties":false,"required":["protocol","profile","sdkVersion","runtimeId","platform","nodeAbi"],"properties":{"protocol":{"const":1},"profile":{"const":"node-sqlite-v1"},"sdkVersion":{"type":"string"},"runtimeId":{"$ref":"#/$defs/hash"},"platform":{"const":"linux/amd64"},"nodeAbi":{"const":"137"}}},
+  "images":{"type":"array","minItems":6,"maxItems":6,"items":{"type":"object","additionalProperties":false,"required":["role","archive","sha256","imageId","repoDigests"],"properties":{"role":{"enum":["lifecycle","control","tooling","runner","database","ingress"]},"archive":{"type":"string","pattern":"^images/"},"sha256":{"$ref":"#/$defs/hash"},"imageId":{"type":"string","pattern":"^sha256:[a-f0-9]{64}$"},"repoDigests":{"type":"array","items":{"type":"string","pattern":"^[a-zA-Z0-9._/:+-]+@sha256:[a-f0-9]{64}$"}}}}},
+  "sdk":{"type":"array","minItems":1,"items":{"type":"object","additionalProperties":false,"required":["path","sha256"],"properties":{"path":{"type":"string","pattern":"^sdk/.*\\.tgz$"},"sha256":{"$ref":"#/$defs/hash"}}}},
+  "files":{"type":"array","maxItems":20000,"items":{"type":"object","additionalProperties":false,"required":["path","bytes","sha256"],"properties":{"path":{"type":"string","maxLength":1024},"bytes":{"type":"integer","minimum":0},"sha256":{"$ref":"#/$defs/hash"}}}},
+  "controlSchema":{"type":"object","additionalProperties":false,"required":["version","migrationHashes","readableBy"],"properties":{"version":{"type":"integer","minimum":1},"migrationHashes":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/hash"}},"readableBy":{"type":"array","items":{"type":"string","pattern":"^c1\\.[0-9]+$"}}}},
+  "upgradeFrom":{"type":"array","items":{"type":"string","pattern":"^c1\\.[0-9]+$"}}
+ },
+ "$defs":{"hash":{"type":"string","pattern":"^[a-f0-9]{64}$"}},
+ "$comment":"The offline verifier additionally checks canonical paths, regular files, complete catalog equality, hashes, image IDs, unique roles and compatibility references. This schema alone is not verification."
+}

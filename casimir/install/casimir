@@ -1,0 +1,99 @@
+#!/bin/sh
+# Trust this wrapper only after verifying the transferred whole archive hash.
+set -eu
+command=${1:-}
+case "$command" in
+ --help|-h) printf '%s\n' 'Casimir experimental single-operator distribution' 'Usage: casimir bundle verify' '       casimir install --state /absolute/private-state --config /absolute/operator-config/config.json' '       casimir auth-setup --state /absolute/private-state [--auth-config /private/auth.json --auth-secrets /private/secrets.json [--identity-policy /private/identity-policy.json]]' '       casimir upgrade --state /absolute/private-state --backup /absolute/verified.backup (target c1.1 only)' 'Verify the whole transferred archive with sha256sum before extracting or running it.'; exit 0 ;;
+ bundle) [ "$#" -eq 2 ] && [ "$2" = verify ] || { echo 'Usage: casimir bundle verify' >&2; exit 2; } ;;
+ auth-setup)
+  if [ "$#" -eq 2 ] && [ "$2" = --help ]; then printf '%s\n' 'Usage: casimir auth-setup --state PATH [--auth-config PATH --auth-secrets PATH [--identity-policy PATH]]'; exit 0; fi
+  [ "$(id -u)" = 0 ] || { echo 'Authentication setup requires the local root Docker operator.' >&2;exit 2; }
+  shift
+  [ "$#" -ge 2 ] && [ "$1" = --state ] || { echo 'Expected auth-setup --state PATH' >&2;exit 2; }
+  state=$2;shift 2
+  auth_config=;auth_secrets=;identity_policy=
+  while [ "$#" -gt 0 ]; do
+   option=$1;shift
+   [ "$#" -gt 0 ] || { echo 'Missing auth-setup option value.' >&2;exit 2; }
+   value=$1;shift
+   case "$value" in /*) ;; *) echo 'Auth-setup paths must be absolute.' >&2;exit 2;; esac
+   case "$value" in *','*) echo 'Invalid auth-setup path.' >&2;exit 2;; esac
+   case "$option" in
+    --auth-config) [ -z "$auth_config" ] || { echo 'Duplicate auth config.' >&2;exit 2; };auth_config=$value ;;
+    --auth-secrets) [ -z "$auth_secrets" ] || { echo 'Duplicate auth secrets.' >&2;exit 2; };auth_secrets=$value ;;
+    --identity-policy) [ -z "$identity_policy" ] || { echo 'Duplicate identity policy.' >&2;exit 2; };identity_policy=$value ;;
+    *) echo 'Unknown auth-setup option.' >&2;exit 2 ;;
+   esac
+  done
+  if { [ -n "$auth_config" ] && [ -z "$auth_secrets" ]; } || { [ -z "$auth_config" ] && [ -n "$auth_secrets" ]; }; then echo 'Auth config and secrets must be supplied together.' >&2;exit 2; fi
+  [ -z "$identity_policy" ] || [ -n "$auth_config" ] || { echo 'Identity policy requires auth config and secrets.' >&2;exit 2; }
+  case "$state" in *','*) echo 'Invalid state path.' >&2;exit 2;; esac
+  [ ! -L "$state" ] && [ -d "$state" ] || { echo 'State must be an existing directory.' >&2;exit 2; }
+  canonical_state=$(CDPATH= cd -- "$state" && pwd -P)
+  [ "$canonical_state" = "$state" ] || { echo 'State path must be canonical.' >&2;exit 2; }
+  for input_path in "$auth_config" "$auth_secrets" "$identity_policy"; do
+   [ -n "$input_path" ] || continue
+   case "$input_path" in "$state"|"$state"/*) echo 'Auth inputs must be outside installation state.' >&2;exit 2;; esac
+   [ ! -L "$input_path" ] && [ -f "$input_path" ] || { echo 'Auth inputs must be regular files without symlinks.' >&2;exit 2; }
+   canonical_parent=$(CDPATH= cd -- "$(dirname -- "$input_path")" && pwd -P)
+   [ "$canonical_parent/$(basename -- "$input_path")" = "$input_path" ] || { echo 'Auth input paths must be canonical.' >&2;exit 2; }
+  done
+  ;;
+ install) [ "$#" -eq 5 ] && [ "$2" = --state ] && [ "$4" = --config ] || { echo 'Expected install --state PATH --config FILE' >&2; exit 2; }; state=$3; config=$5; case "$state:$config" in *','*|*'
+'*) echo 'Invalid path' >&2;exit 2;; esac; case "$state" in /*) ;; *) exit 2;; esac; case "$config" in /*) ;; *) exit 2;; esac; [ "$(id -u)" = 0 ] || { echo 'Installation requires the local root Docker operator.' >&2;exit 2; } ;;
+ status|stop|start|retention|uninstall) [ "$#" -eq 3 ] && [ "$2" = --state ] || { echo 'Expected command --state PATH' >&2;exit 2; };state=$3;case "$state" in /*) ;; *) exit 2;; esac;case "$state" in *','*|*'
+'*) exit 2;; esac;[ "$(id -u)" = 0 ] && [ ! -L "$state" ] && [ -d "$state" ] || exit 2 ;;
+ backup) [ "$#" -eq 7 ] && [ "$2" = --state ] && [ "$4" = --output ] && [ "$6" = --key-file ] || exit 2;state=$3;output=$5;key=$7;
+ for path in "$state" "$output" "$key"; do case "$path" in /*) ;; *) exit 2;; esac;case "$path" in *','*|*'
+'*) exit 2;; esac;[ ! -L "$path" ] || exit 2;done;[ "$(id -u)" = 0 ] && [ -d "$state" ] && [ -f "$key" ] || exit 2 ;;
+ upgrade) [ "$#" -eq 5 ] && [ "$2" = --state ] && [ "$4" = --backup ] || exit 2;state=$3;backup=$5;
+ for path in "$state" "$backup"; do case "$path" in /*) ;; *) exit 2;; esac;case "$path" in *','*|*'
+'*) exit 2;; esac;[ ! -L "$path" ] || exit 2;done;[ "$(id -u)" = 0 ] && [ -d "$state" ] && [ -f "$backup" ] || exit 2 ;;
+ restore) [ "$#" -eq 7 ] && [ "$2" = --state ] && [ "$4" = --input ] && [ "$6" = --key-file ] || exit 2;state=$3;input=$5;key=$7;
+ for path in "$state" "$input" "$key"; do case "$path" in /*) ;; *) exit 2;; esac;case "$path" in *','*|*'
+'*) exit 2;; esac;[ ! -L "$path" ] || exit 2;done;[ "$(id -u)" = 0 ] && [ -f "$input" ] && [ -f "$key" ] || exit 2 ;;
+ *) echo 'Unknown command; use --help.' >&2; exit 2 ;;
+esac
+bundle_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+[ ! -L "$bundle_root/bootstrap.txt" ] && [ -f "$bundle_root/bootstrap.txt" ] || { echo 'Missing regular bootstrap catalog' >&2; exit 1; }
+[ "$(wc -l < "$bundle_root/bootstrap.txt")" -eq 2 ] || { echo 'Invalid bootstrap catalog' >&2; exit 1; }
+archive_hash=$(sed -n '1p' "$bundle_root/bootstrap.txt")
+image_id=$(sed -n '2p' "$bundle_root/bootstrap.txt")
+printf '%s\n' "$archive_hash" | LC_ALL=C grep -Eq '^[a-f0-9]{64}$' || exit 1
+printf '%s\n' "$image_id" | LC_ALL=C grep -Eq '^sha256:[a-f0-9]{64}$' || exit 1
+[ ! -L "$bundle_root/images" ] && [ ! -L "$bundle_root/images/lifecycle.tar.gz" ] && [ -f "$bundle_root/images/lifecycle.tar.gz" ] || { echo 'Missing regular lifecycle archive' >&2; exit 1; }
+actual_hash=$(sha256sum < "$bundle_root/images/lifecycle.tar.gz")
+[ "${actual_hash%% *}" = "$archive_hash" ] || { echo 'Lifecycle archive checksum mismatch; no image loaded.' >&2; exit 1; }
+present=$(docker image inspect --format '{{.Id}}' "$image_id" 2>/dev/null || true)
+if [ "$present" != "$image_id" ]; then docker load --input "$bundle_root/images/lifecycle.tar.gz" >/dev/null; fi
+docker run --rm --pull never --network none --read-only --cap-drop ALL --security-opt no-new-privileges --memory 512m --cpus 1 --pids-limit 128 --mount "type=bind,src=$bundle_root,dst=/bundle,readonly" "$image_id" node /src/casimir/install/bundle.mjs /bundle
+if [ "$command" = install ]; then
+ [ ! -L "$state" ] && [ ! -L "$config" ] || { echo 'State/config links are refused' >&2;exit 1; }
+ if [ ! -e "$state" ]; then mkdir -m 700 -- "$state"; fi
+ config_dir=$(CDPATH= cd -- "$(dirname -- "$config")" && pwd -P)
+ docker run --rm --pull never --network host --read-only --user 0:0 --cap-drop ALL --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER --security-opt no-new-privileges --memory 512m --cpus 1 --pids-limit 128 --tmpfs /tmp:rw,nosuid,size=64m --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --mount "type=bind,src=$bundle_root,dst=$bundle_root,readonly" --mount "type=bind,src=$state,dst=$state" --mount "type=bind,src=$config_dir,dst=$config_dir,readonly" "$image_id" node /src/casimir/install/cli.mjs install "$state" "$config" "$bundle_root"
+fi
+if [ "$command" = status ] || [ "$command" = stop ] || [ "$command" = start ] || [ "$command" = retention ] || [ "$command" = uninstall ]; then
+ docker run --rm --pull never --network none --read-only --user 0:0 --cap-drop ALL --security-opt no-new-privileges --memory 512m --cpus 1 --pids-limit 128 --tmpfs /tmp:rw,nosuid,size=64m --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --mount "type=bind,src=$state,dst=$state" "$image_id" node /src/casimir/install/cli.mjs "$command" "$state"
+fi
+if [ "$command" = auth-setup ]; then
+ set -- run --rm --pull never --network host --read-only --user 0:0 --cap-drop ALL --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER --security-opt no-new-privileges --memory 512m --cpus 1 --pids-limit 128 --tmpfs /tmp:rw,nosuid,size=64m --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --mount "type=bind,src=$state,dst=$state" --mount "type=bind,src=$bundle_root,dst=$bundle_root,readonly"
+ if [ -n "$auth_config" ]; then set -- "$@" --mount "type=bind,src=$auth_config,dst=$auth_config,readonly" --mount "type=bind,src=$auth_secrets,dst=$auth_secrets,readonly"; fi
+ if [ -n "$identity_policy" ]; then set -- "$@" --mount "type=bind,src=$identity_policy,dst=$identity_policy,readonly"; fi
+ set -- "$@" "$image_id" node /src/casimir/install/cli.mjs auth-setup --state "$state"
+ if [ -n "$auth_config" ]; then set -- "$@" --auth-config "$auth_config" --auth-secrets "$auth_secrets"; fi
+ if [ -n "$identity_policy" ]; then set -- "$@" --identity-policy "$identity_policy"; fi
+ docker "$@"
+fi
+if [ "$command" = backup ]; then
+ output_dir=$(CDPATH= cd -- "$(dirname -- "$output")" && pwd -P)
+ docker run --rm --pull never --network none --read-only --user 0:0 --cap-drop ALL --security-opt no-new-privileges --memory 512m --cpus 1 --pids-limit 128 --tmpfs /tmp:rw,nosuid,size=64m --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --mount "type=bind,src=$state,dst=$state" --mount "type=bind,src=$key,dst=$key,readonly" --mount "type=bind,src=$output_dir,dst=$output_dir" "$image_id" node /src/casimir/install/cli.mjs backup "$state" "$output" "$key"
+fi
+if [ "$command" = restore ]; then
+ if [ ! -e "$state" ]; then mkdir -m 700 -- "$state"; fi
+ docker run --rm --pull never --network host --read-only --user 0:0 --cap-drop ALL --cap-add CHOWN --security-opt no-new-privileges --memory 512m --cpus 1 --pids-limit 128 --tmpfs /tmp:rw,nosuid,size=64m --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --mount "type=bind,src=$state,dst=$state" --mount "type=bind,src=$key,dst=$key,readonly" --mount "type=bind,src=$input,dst=$input,readonly" --mount "type=bind,src=$bundle_root,dst=$bundle_root,readonly" "$image_id" node /src/casimir/install/cli.mjs restore "$state" "$input" "$key" "$bundle_root"
+fi
+
+if [ "$command" = upgrade ]; then
+ docker run --rm --pull never --network none --read-only --user 0:0 --cap-drop ALL --cap-add CHOWN --security-opt no-new-privileges --memory 512m --cpus 1 --pids-limit 128 --tmpfs /tmp:rw,nosuid,size=64m --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock --mount "type=bind,src=$state,dst=$state" --mount "type=bind,src=$backup,dst=$backup,readonly" --mount "type=bind,src=$bundle_root,dst=$bundle_root,readonly" "$image_id" node /src/casimir/install/cli.mjs upgrade "$state" "$bundle_root" "$backup"
+fi

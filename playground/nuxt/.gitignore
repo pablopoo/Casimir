@@ -1,0 +1,6 @@
+.nuxt/
+.output/
+.void/
+.wrangler/
+node_modules/
+server/middleware/__void-dev-trigger.ts

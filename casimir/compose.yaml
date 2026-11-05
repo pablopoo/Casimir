@@ -1,0 +1,85 @@
+name: casimir-control-m1
+x-tooling: &tooling
+  image: casimir-control-m1-tooling:local
+  build:
+    context: ..
+    dockerfile: casimir/Dockerfile
+    target: tooling
+  working_dir: /src
+  env_file: ../.local/api.env
+  networks: [runtime]
+  labels: { org.casimir.task: control-m1 }
+services:
+  db:
+    image: postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+    env_file: ../.local/db.env
+    volumes: [database:/var/lib/postgresql]
+    networks: [runtime]
+    labels: { org.casimir.task: control-m1 }
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U casimir -d casimir']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    mem_limit: 512m
+    cpus: 1
+  migrate:
+    <<: *tooling
+    command: [sh, -c, 'node casimir/migrate.mjs && node casimir/seed.mjs']
+    depends_on:
+      db: { condition: service_healthy }
+  api:
+    <<: *tooling
+    image: casimir-control-m1-api:local
+    build:
+      context: ..
+      dockerfile: casimir/Dockerfile
+      target: runtime
+    user: node
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 1
+    depends_on:
+      db: { condition: service_healthy }
+  checks:
+    <<: *tooling
+    environment:
+      API_BASE_URL: http://ingress:8080
+    volumes: ['../.local/results:/results']
+    command:
+      [
+        sh,
+        -c,
+        'node casimir/build.mjs && node --test --test-concurrency=1 platform/packages/api/test/casimir-node/*.test.mjs',
+      ]
+  ingress:
+    image: nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
+    entrypoint: [nginx, -c, /etc/nginx/casimir.conf, -g, 'daemon off;']
+    user: '101:101'
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ['127.0.0.1:4281:8080']
+    networks: [runtime, ingress]
+    configs:
+      - source: ingress
+        target: /etc/nginx/casimir.conf
+    depends_on: [api]
+    mem_limit: 128m
+    cpus: 0.25
+    labels: { org.casimir.task: control-m1 }
+networks:
+  runtime:
+    internal: true
+    labels: { org.casimir.task: control-m1 }
+  ingress:
+    labels: { org.casimir.task: control-m1 }
+configs:
+  ingress:
+    file: ./ingress.conf
+volumes:
+  database:
+    labels: { org.casimir.task: control-m1 }

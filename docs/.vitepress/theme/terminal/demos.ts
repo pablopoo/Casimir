@@ -1,0 +1,280 @@
+import type { TerminalDemo, TerminalEvent, TerminalSegment, TerminalTone } from './timeline.ts';
+
+const s = (text: string, tone: TerminalTone = 'base', bold = false): TerminalSegment => ({
+  text,
+  tone,
+  bold,
+});
+const write = (at: number, id: string, ...segments: Array<TerminalSegment>): TerminalEvent => ({
+  at,
+  type: 'write',
+  line: { id, segments },
+});
+const blank = (at: number, id: string) => write(at, id, s(' '));
+const command = (at: number, id: string, text: string): TerminalEvent => ({
+  at,
+  type: 'type',
+  id,
+  text,
+  duration: Math.min(650, text.length * 16),
+  prefix: [s('$ ', 'muted')],
+});
+const spinner = (at: number, id: string, message: string): TerminalEvent => ({
+  at,
+  type: 'write',
+  line: { id, spinner: true, segments: [s(message)] },
+});
+const done = (at: number, id: string, text: string) => write(at, id, s('◇ ', 'muted'), s(text));
+const maskedCredential = (at: number, id: string, message: string): Array<TerminalEvent> => [
+  write(at, id, s('› ', 'blue'), s(message)),
+  {
+    at: at + 90,
+    type: 'type',
+    id: `${id}-value`,
+    text: '▪'.repeat(24),
+    duration: 220,
+    prefix: [s('  ')],
+    tone: 'muted',
+  },
+  done(at + 370, id, message),
+  write(at + 370, `${id}-value`, s('  ' + '▪'.repeat(24), 'muted')),
+];
+const remove = (at: number, id: string): TerminalEvent => ({ at, type: 'remove', id });
+const boxTop = (
+  at: number,
+  id: string,
+  title: string,
+  width: number,
+  tone: TerminalTone = 'base',
+) =>
+  write(
+    at,
+    id,
+    s('╭─ ', 'muted'),
+    s(title, tone),
+    s(' ' + '─'.repeat(width - title.length - 5) + '╮', 'muted'),
+  );
+const boxRow = (at: number, id: string, width: number, ...segments: Array<TerminalSegment>) => {
+  const length = segments.reduce((total, segment) => total + Array.from(segment.text).length, 0);
+  return write(
+    at,
+    id,
+    s('│  ', 'muted'),
+    ...segments,
+    s(' '.repeat(width - length - 4) + '│', 'muted'),
+  );
+};
+const boxBottom = (at: number, id: string, width: number) =>
+  write(at, id, s('╰' + '─'.repeat(width - 2) + '╯', 'muted'));
+
+// Sample values, accelerated timing, and prepared credentials. Wording and transient
+// spinner replacement follow deploy.ts, platform-lifecycle.ts, platform-installer.ts,
+// logs.ts, rollback.ts, and the shared Vite+ renderer. See README.md when refreshing.
+const deploy: TerminalDemo = {
+  id: 'deploy',
+  label: 'Deploy an app',
+  title: 'From your terminal to the world.',
+  description: 'Build your app, apply migrations, and put it online on Cloudflare. One command.',
+  directory: '~/blog',
+  command: 'void deploy',
+  duration: 7500,
+  context:
+    'A React app with server routes and D1, already deployed directly to Cloudflare. Cloudflare is the saved deploy target; login and database setup are prepared. Build output is condensed.',
+  link: '/guide/deployment',
+  linkLabel: 'Explore deployment',
+  events: [
+    command(0, 'command', 'void deploy'),
+    blank(530, 'gap'),
+    write(530, 'intro', s('blog → ', 'muted'), s('Cloudflare', 'blue')),
+    blank(680, 'intro-gap'),
+    write(
+      850,
+      'vite',
+      s('vite ', 'green'),
+      s('building client environment for production...', 'muted'),
+    ),
+    write(1090, 'modules', s('✓ ', 'green'), s('142 modules transformed.')),
+    write(
+      1230,
+      'client',
+      s('dist/client/assets/index-D9h2kL.js', 'blue'),
+      s('  38.42 kB', 'muted'),
+    ),
+    write(1350, 'built', s('✓ built in 428ms', 'green')),
+    write(1520, 'prepare', s('◇ ', 'muted'), s('Preparing deployment...')),
+    write(1720, 'migrations', s('◇ ', 'muted'), s('Applying D1 migrations...')),
+    spinner(2130, 'deploy', 'Checking the current Worker deployment...'),
+    spinner(2760, 'deploy', 'Uploading the Worker and assets...'),
+    spinner(3340, 'deploy', 'Verifying the uploaded Worker...'),
+    spinner(3920, 'deploy', 'Waiting for the Worker to become ready...'),
+    spinner(4790, 'deploy', 'Activating the Worker...'),
+    spinner(5270, 'deploy', 'Updating routes and triggers...'),
+    remove(5850, 'deploy'),
+    blank(6000, 'summary-gap'),
+    boxTop(6000, 'box-top', 'https://blog.orange-cloud.workers.dev', 44, 'blue'),
+    boxRow(6100, 'box-gap', 44),
+    boxRow(6190, 'summary1', 44, s('Worker: blog')),
+    boxRow(6290, 'summary2', 44, s('D1 migrations up to date')),
+    boxBottom(6580, 'box-bottom', 44),
+    blank(6730, 'outro-gap'),
+    write(6730, 'outro', s('✓ Successfully deployed!', 'green')),
+  ],
+};
+
+const install: TerminalDemo = {
+  id: 'install',
+  label: 'Install a platform',
+  title: 'Your cloud. Your platform.',
+  description: 'Give your team a shared deployment environment in your own Cloudflare account.',
+  directory: '~/orange-cloud',
+  command: 'void platform install',
+  duration: 7500,
+  context:
+    'Sample Orange Cloud installation with masked credential entry. Cloudflare login, PostgreSQL/Hyperdrive, and GitHub/R2 setup are prepared; administrator identity, client/access IDs, and signing/encryption keys are supplied outside this recording. Setup output and timings are condensed.',
+  link: '/guide/self-hosted-platform',
+  linkLabel: 'Explore the platform',
+  events: [
+    command(0, 'command', 'void platform install'),
+    blank(450, 'gap'),
+    write(500, 'name', s('› ', 'blue'), s('Installation name:')),
+    {
+      at: 580,
+      type: 'type',
+      id: 'name-value',
+      text: 'orange-cloud',
+      duration: 180,
+      prefix: [s('  ')],
+    },
+    done(790, 'name', 'Installation name:'),
+    write(790, 'name-value', s('  orange-cloud', 'muted')),
+    write(850, 'where', s('› ', 'blue'), s('Where should your apps live?')),
+    write(850, 'domain-option', s('  › Use a domain', 'blue', true), s(': recommended', 'muted')),
+    write(850, 'workers-option', s('    Use workers.dev for testing', 'muted')),
+    write(850, 'instructions', s('  ↑/↓ navigate · Enter confirm', 'muted')),
+    done(1070, 'where', 'Where should your apps live?'),
+    write(1070, 'domain-option', s('  Use a domain', 'muted')),
+    remove(1070, 'workers-option'),
+    remove(1070, 'instructions'),
+    write(1150, 'domain', s('› ', 'blue'), s('Application base domain:')),
+    {
+      at: 1230,
+      type: 'type',
+      id: 'domain-value',
+      text: 'orange-cloud.example',
+      duration: 200,
+      prefix: [s('  ')],
+    },
+    done(1450, 'domain', 'Application base domain:'),
+    write(1450, 'domain-value', s('  orange-cloud.example', 'muted')),
+    done(1540, 'zone', 'Cloudflare zone:'),
+    write(1540, 'zone-value', s('  orange-cloud.example', 'muted')),
+    done(1640, 'display', 'Platform display name:'),
+    write(1640, 'display-value', s('  Orange Cloud', 'muted')),
+    blank(1760, 'plan-gap'),
+    boxTop(1760, 'plan-top', 'Installation plan', 58),
+    boxRow(1800, 'plan1', 58, s('Orange Cloud in Orange, Inc.', 'base', true)),
+    boxRow(1840, 'plan2', 58, s('Applications: *.orange-cloud.example')),
+    boxRow(1880, 'plan3', 58, s('Login methods: github')),
+    boxRow(1920, 'plan4', 58, s('Database: PostgreSQL via Hyperdrive')),
+    boxRow(1960, 'plan5', 58),
+    boxRow(2000, 'plan6', 58, s('create  dispatch-namespace  void-orange-cloud-users')),
+    boxRow(2040, 'plan7', 58, s('create  kv-namespace        void-orange-cloud-routing')),
+    boxRow(2080, 'plan8', 58, s('create  r2-bucket           void-orange-cloud-assets')),
+    boxBottom(2160, 'plan-bottom', 58),
+    write(2260, 'apply', s('› ', 'blue'), s('Apply this plan?')),
+    write(2260, 'apply-value', s('  › ', 'blue'), s('Yes', 'base', true), s(' /   No', 'muted')),
+    done(2460, 'apply', 'Apply this plan?'),
+    write(2460, 'apply-value', s('  Yes', 'muted')),
+    blank(2580, 'credentials-gap'),
+    write(2650, 'token-help', s('● ', 'blue'), s('Cloudflare runtime token', 'blue')),
+    write(
+      2700,
+      'token-help-detail',
+      s('  Create a token, review its permissions, then paste it here.', 'muted'),
+    ),
+    ...maskedCredential(2820, 'runtime-token', 'Paste runtime API token:'),
+    ...maskedCredential(3300, 'database-url', 'PostgreSQL DATABASE_URL:'),
+    ...maskedCredential(3780, 'github-secret', 'GitHub OAuth client secret:'),
+    write(4230, 'r2-help', s('● ', 'blue'), s('R2 upload token')),
+    ...maskedCredential(4300, 'r2-secret', 'Secret Access Key:'),
+    blank(4820, 'progress-gap'),
+    spinner(4820, 'install', 'Preparing the platform database'),
+    spinner(5030, 'install', 'Applying platform database migrations'),
+    spinner(5230, 'install', 'Checking and creating Cloudflare resources'),
+    spinner(5430, 'install', 'Deploying the api service'),
+    spinner(5620, 'install', 'Deploying the proxy service'),
+    spinner(5820, 'install', 'Deploying the dispatch service'),
+    spinner(6070, 'install', 'Verifying platform health'),
+    spinner(6320, 'install', 'Enabling the api service'),
+    spinner(6490, 'install', 'Verifying the enabled platform'),
+    done(6670, 'install', 'Platform installed.'),
+    write(
+      6810,
+      'installed',
+      s('◆ ', 'muted'),
+      s('Orange Cloud is installed at https://api.orange-cloud.example/admin.'),
+    ),
+    write(6950, 'url', s('● ', 'blue'), s('API URL: https://api.orange-cloud.example')),
+    blank(7090, 'outro-gap'),
+    write(
+      7090,
+      'outro',
+      s('Run `void account login`, then deploy an app with `void deploy --platform void`.'),
+    ),
+  ],
+};
+
+const recover: TerminalDemo = {
+  id: 'recover',
+  label: 'Logs & rollback',
+  title: 'Find the failure. Roll it back.',
+  description:
+    'Inspect a failed request and restore a previous deployment, without leaving your terminal.',
+  directory: '~/orange-cloud/blog',
+  command: 'void project logs → void project rollback',
+  duration: 7500,
+  context:
+    'A linked project on Orange Cloud. The previous retained deployment uses the same database schema; rollback restores the code, not database migrations.',
+  link: '/reference/cli/project',
+  linkLabel: 'Explore project commands',
+  events: [
+    command(0, 'logs-command', 'void project logs --level error --range 15m'),
+    blank(760, 'logs-gap'),
+    write(900, 'request', s('14:32:07 ', 'muted'), s('POST /api/comments '), s('500', 'red')),
+    write(1060, 'error', s('  [error] ', 'red'), s('Comment could not be saved')),
+    write(1220, 'exception', s('  [exception] ', 'red'), s('TypeError: Cannot read properties')),
+    write(1220, 'exception-continuation', s("              of undefined (reading 'id')")),
+    blank(1420, 'logs-outro-gap'),
+    write(1420, 'logs-outro', s('1 log entry', 'muted')),
+    blank(1930, 'rollback-gap'),
+    command(1930, 'rollback-command', 'void project rollback'),
+    blank(2450, 'rollback-intro-gap'),
+    write(2630, 'select-title', s('› ', 'blue'), s('Select a deployment to roll back to:')),
+    write(2630, 'selected', s('  › dpl_7c42a1 18m ago', 'blue', true), s(': via cli', 'muted')),
+    write(2630, 'option', s('    dpl_3b9e80 2h ago', 'muted')),
+    write(2630, 'instructions', s('  ↑/↓ navigate · Enter confirm', 'muted')),
+    done(3290, 'select-title', 'Select a deployment to roll back to:'),
+    write(3290, 'selected', s('  dpl_7c42a1 18m ago', 'muted')),
+    remove(3290, 'option'),
+    remove(3290, 'instructions'),
+    spinner(3450, 'rollback', 'Rolling back'),
+    done(4170, 'rollback', 'Rollback complete.'),
+    write(
+      4370,
+      'rolled-back',
+      s('◆ ', 'muted'),
+      s('Rolled back to '),
+      s('dpl_7c42a1', 'base', true),
+    ),
+    write(4570, 'traffic', s('Traffic is now serving the rolled-back deployment.', 'muted')),
+    blank(5090, 'verify-gap'),
+    command(5090, 'verify-command', 'void project logs --range 1m'),
+    blank(5780, 'verify-intro-gap'),
+    write(5940, 'verify-request', s('14:33:21 ', 'muted'), s('POST /api/comments 201')),
+    write(6180, 'verify-log', s('  [info] ', 'muted'), s('Comment saved')),
+    blank(6420, 'verify-outro-gap'),
+    write(6420, 'verify-outro', s('1 log entry', 'muted')),
+  ],
+};
+
+export const terminalDemos = [deploy, install, recover];

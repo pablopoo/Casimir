@@ -1,0 +1,58 @@
+{
+  "name": "@void/svelte",
+  "version": "1.1.11",
+  "description": "Svelte pages, server rendering, forms, and navigation for Void.",
+  "homepage": "https://void.cloud",
+  "bugs": {
+    "url": "https://github.com/voidzero-dev/void/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voidzero-dev/void.git",
+    "directory": "packages/svelte"
+  },
+  "files": [
+    "dist",
+    "src/runtime"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "svelte": "./src/runtime/index.ts",
+      "default": "./src/runtime/index.ts"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.mts",
+      "import": "./dist/plugin.mjs"
+    },
+    "./App.svelte": {
+      "svelte": "./src/runtime/App.svelte",
+      "default": "./src/runtime/App.svelte"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "typecheck": "tsc --noEmit --rootDir ../.."
+  },
+  "dependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "pathslash": "catalog:",
+    "svelte": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "void": "workspace:*"
+  },
+  "peerDependencies": {
+    "svelte": "^5.0.0",
+    "vite": "^8.0.0",
+    "void": "workspace:*"
+  }
+}

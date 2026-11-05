@@ -1,0 +1,4 @@
+.svelte-kit/
+.void/
+.wrangler/
+node_modules/

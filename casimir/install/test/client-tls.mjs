@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+const config=JSON.parse(await readFile(process.argv[2]??'/config/operator.json','utf8'));
+assert.equal((await fetch(config.controlOrigin+'/health')).status,200);
+assert.equal((await fetch(config.appOrigin+'/')).status,503);
+assert.equal((await fetch(config.controlOrigin+'/health',{headers:{Origin:'https://forged.invalid'}})).status,403);
+const env={...process.env};delete env.NODE_EXTRA_CA_CERTS;
+const child=spawnSync(process.execPath,['--input-type=module','-e',`try{await fetch(${JSON.stringify(config.controlOrigin+'/health')});process.exit(1)}catch{process.exit(0)}`],{env,encoding:'utf8'});assert.equal(child.status,0,'untrusted CA was accepted');
+const wrong=new URL(config.controlOrigin);wrong.hostname='localhost';await assert.rejects(()=>fetch(wrong.origin+'/health'));
+console.log(JSON.stringify({trustedCa:true,untrustedCaRejected:true,wrongHostnameRejected:true,forgedOriginRejected:true,predeploymentAppStatus:503}));

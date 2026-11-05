@@ -1,0 +1,21 @@
+{
+  "setup": "/guide/email/sending#setup",
+  "adding-recipients": "/guide/email/sending#adding-recipients",
+  "your-own-domain-on-the-platform": "/guide/email/domains#your-own-domain-on-the-platform",
+  "options": "/guide/email/sending#options",
+  "attachments": "/guide/email/sending#attachments",
+  "result-and-errors": "/guide/email/sending#result-and-errors",
+  "local-development": "/guide/email/sending#local-development",
+  "testing": "/guide/email/sending#testing",
+  "inbound": "/guide/email/receiving#inbound",
+  "per-recipient-routing": "/guide/email/receiving#per-recipient-routing",
+  "threaded-replies": "/guide/email/receiving#threaded-replies",
+  "configuring-inbound-delivery": "/guide/email/receiving#configuring-inbound-delivery",
+  "testing-inbound-handlers": "/guide/email/receiving#testing-inbound-handlers",
+  "your-own-cloudflare-account": "/guide/email/domains#your-own-cloudflare-account",
+  "setup-1": "/guide/email/domains#setup-1",
+  "inbound-addresses": "/guide/email/domains#inbound-addresses",
+  "sending": "/guide/email/domains#sending",
+  "configuration-changes": "/guide/email/domains#configuration-changes",
+  "ci": "/guide/email/domains#ci"
+}

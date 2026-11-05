@@ -1,0 +1,31 @@
+{
+  "project": "Casimir",
+  "status": "experimental source preparation; not a published release",
+  "productSourceCommit": "f31f2eb4e08742e3a88d075ccea99ab8051a4ca8",
+  "productSourceTree": "633f6bfac0d3749779aba590f39dc53788606622",
+  "upstream": {
+    "repository": "https://github.com/voidzero-dev/void",
+    "examinedVersion": "1.1.11",
+    "examinedCommit": "a38b1f874e16e52a9b32539163f80f2ba6c6b966",
+    "license": "MIT"
+  },
+  "preparation": {
+    "history": "fresh snapshot; original Git history and remotes excluded",
+    "documentation": "Casimir entry README, contribution guidance and private-file exclusions supplied",
+    "omitted": [
+      "internal workspace and project-management records",
+      "agent instructions and local tool settings",
+      "real environment/deployment configuration",
+      "runtime state, secrets, backups and dependency caches",
+      "inherited deployment/publication workflows and CODEOWNERS",
+      "upstream internal maintainer/design archive"
+    ]
+  },
+  "validation": {
+    "focusedBrandingTestsPassed": 72,
+    "apiTypecheck": "passed",
+    "freshBrandedStandaloneRuntime": "pending",
+    "fullVoidParity": "unfinished",
+    "fullUpstreamSuiteGreen": false
+  }
+}

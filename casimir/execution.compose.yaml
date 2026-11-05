@@ -1,0 +1,216 @@
+name: casimir-execution-poc
+x-tooling: &tooling
+  image: casimir-execution-runtime:local
+  build:
+    context: ..
+    dockerfile: casimir/Dockerfile
+    target: runtime
+    labels: { org.casimir.task: execution-poc }
+  working_dir: /src
+  env_file: ../.local/execution/api.env
+  networks: [runtime]
+  labels: { org.casimir.task: execution-poc }
+x-runtime: &bounded
+  init: true
+  user: node
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  mem_limit: 512m
+  cpus: 1
+  pids_limit: 128
+  tmpfs: ['/tmp:rw,noexec,nosuid,size=32m']
+x-image: &image
+  image: casimir-execution-runtime:local
+  build:
+    context: ..
+    dockerfile: casimir/Dockerfile
+    target: runtime
+    labels: { org.casimir.task: execution-poc }
+x-demo: &demo
+  profiles: [prepare]
+  labels: { org.casimir.task: execution-poc }
+x-ingress: &ingress
+  image: nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
+  user: '101:101'
+  read_only: true
+  tmpfs: ['/tmp:rw,noexec,nosuid,size=16m']
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  mem_limit: 128m
+  cpus: 0.25
+  pids_limit: 64
+services:
+  db:
+    image: postgres:18-bookworm@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c
+    env_file: ../.local/execution/db.env
+    networks: [runtime]
+    volumes: [database:/var/lib/postgresql]
+    labels: { org.casimir.task: execution-poc }
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U casimir_execution -d casimir_execution']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  checks:
+    <<: *tooling
+    networks: [runtime, app]
+    init: true
+    user: node
+    mem_limit: 2g
+    cpus: 1
+    pids_limit: 256
+    command: [sleep, infinity]
+    volumes: ['../.local/execution/results:/results']
+  migrate:
+    <<: [*tooling, *bounded]
+    profiles: [prepare]
+    command:
+      [
+        sh,
+        -c,
+        'node casimir/migrate.mjs && node casimir/migrate-execution.mjs && node casimir/seed.mjs',
+      ]
+  api:
+    <<: [*bounded, *image]
+    env_file: ../.local/execution/api.env
+    environment: { CASIMIR_EXECUTION_PROFILE: /config/profile.json }
+    networks: [runtime]
+    volumes: ['../.local/execution/catalog/profile.json:/config/profile.json:ro']
+    labels: { org.casimir.task: execution-poc, org.casimir.role: api }
+  executor:
+    <<: [*bounded, *image]
+    command: [node, casimir/dist/executor.mjs]
+    env_file: ../.local/execution/api.env
+    environment:
+      {
+        CASIMIR_EXECUTION_PROFILE: /config/profile.json,
+        CASIMIR_TEST_FAILPOINT: '${CASIMIR_TEST_FAILPOINT:-}',
+      }
+    group_add: ['${CASIMIR_DOCKER_GID:-0}']
+    networks: [runtime, app]
+    volumes:
+      [
+        '/var/run/docker.sock:/var/run/docker.sock',
+        '../.local/execution/catalog/profile.json:/config/profile.json:ro',
+        'routes:/routes',
+      ]
+    labels:
+      {
+        org.casimir.task: execution-poc,
+        org.casimir.scope: casimir-execution-poc,
+        org.casimir.role: executor,
+      }
+  control-ingress:
+    <<: *ingress
+    entrypoint: [nginx, -c, /etc/nginx/casimir.conf, -g, 'daemon off;']
+    ports: ['127.0.0.1:4283:8080']
+    networks: [runtime, control-front]
+    configs: [{ source: execution-control, target: /etc/nginx/casimir.conf }]
+    labels: { org.casimir.task: execution-poc, org.casimir.role: control-ingress }
+  app-ingress:
+    <<: *ingress
+    entrypoint: [nginx, -c, /routes/route.conf, -g, 'daemon off;']
+    ports: ['127.0.0.1:4284:8080']
+    networks: [app, app-front]
+    volumes: ['routes:/routes:ro']
+    labels:
+      {
+        org.casimir.task: execution-poc,
+        org.casimir.scope: casimir-execution-poc,
+        org.casimir.role: app-ingress,
+      }
+  routes-init:
+    <<: [*bounded, *image]
+    profiles: [prepare]
+    user: '0:0'
+    cap_add: [CHOWN, DAC_OVERRIDE]
+    command: [node, casimir/dist/operator.mjs, init-routes]
+    network_mode: none
+    volumes: ['routes:/routes']
+    labels: { org.casimir.task: execution-poc, org.casimir.role: routes-init }
+  prepare-profile:
+    <<: [*bounded, *image]
+    profiles: [prepare]
+    command: [node, casimir/dist/operator.mjs, prepare-profile]
+    group_add: ['${CASIMIR_DOCKER_GID:-0}']
+    network_mode: none
+    volumes: ['/var/run/docker.sock:/var/run/docker.sock', '../.local/execution/catalog:/config']
+    labels: { org.casimir.task: execution-poc, org.casimir.role: prepare-profile }
+  operator:
+    <<: [*bounded, *image]
+    profiles: [prepare]
+    command: [node, casimir/dist/operator.mjs, verify-environment]
+    group_add: ['${CASIMIR_DOCKER_GID:-0}']
+    network_mode: none
+    volumes:
+      [
+        '/var/run/docker.sock:/var/run/docker.sock',
+        '../.local/execution/catalog/profile.json:/config/profile.json:ro',
+        'routes:/routes:ro',
+      ]
+    labels: { org.casimir.task: execution-poc, org.casimir.role: operator }
+  demo-v1:
+    <<: *demo
+    image: casimir-execution-demo:v1
+    build: { context: .., dockerfile: casimir/demo/Dockerfile, args: { VERSION: v1 } }
+  demo-v2:
+    <<: *demo
+    image: casimir-execution-demo:v2
+    build: { context: .., dockerfile: casimir/demo/Dockerfile, args: { VERSION: v2 } }
+  demo-broken:
+    <<: *demo
+    image: casimir-execution-demo:broken
+    build: { context: .., dockerfile: casimir/demo/Dockerfile, args: { VERSION: broken } }
+  validation:
+    profiles: [validation]
+    image: casimir-execution-validation:local
+    build:
+      context: ..
+      dockerfile: casimir/Dockerfile
+      target: validation
+      labels: { org.casimir.task: execution-poc }
+    init: true
+    user: node
+    working_dir: /src
+    network_mode: none
+    mem_limit: 6g
+    memswap_limit: 8g
+    cpus: 2
+    pids_limit: 512
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      CI: '1'
+      HOME: /home/node
+      GIT_OPTIONAL_LOCKS: '0'
+      PLAYWRIGHT_BROWSERS_PATH: /opt/playwright
+      APP_NAME: casimir-regression-fixture
+      SECRET_KEY: casimir-synthetic-fixture-only
+      API_URL: https://api.example.test
+    command: [sleep, infinity]
+    volumes: ['../.git:/src/.git:ro', '../.local/execution/results:/results']
+    labels: { org.casimir.task: execution-poc, org.casimir.role: validation }
+networks:
+  runtime:
+    internal: true
+    labels: { org.casimir.task: execution-poc }
+  app:
+    internal: true
+    labels: { org.casimir.task: execution-poc }
+  control-front:
+    labels: { org.casimir.task: execution-poc }
+  app-front:
+    labels: { org.casimir.task: execution-poc }
+configs:
+  execution-control: { file: ./execution-control.conf }
+volumes:
+  database:
+    labels: { org.casimir.task: execution-poc }
+  appdata:
+    labels: { org.casimir.task: execution-poc }
+  routes:
+    labels: { org.casimir.task: execution-poc }

@@ -1,0 +1,125 @@
+/* Void Markdown — Containers & GitHub Alerts */
+
+.void-md .custom-block {
+  margin: 1em 0;
+  padding: 1em 1.25em;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.void-md .custom-block-title {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+.void-md .custom-block > :last-child {
+  margin-bottom: 0;
+}
+
+/* Tip */
+.void-md .tip {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.void-md .tip .custom-block-title {
+  color: #10b981;
+}
+
+/* Info / Note */
+.void-md .info,
+.void-md .note {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.void-md .info .custom-block-title,
+.void-md .note .custom-block-title {
+  color: #3b82f6;
+}
+
+/* Warning / Important */
+.void-md .warning,
+.void-md .important {
+  border-color: #eab308;
+  background: rgba(234, 179, 8, 0.08);
+}
+
+.void-md .warning .custom-block-title,
+.void-md .important .custom-block-title {
+  color: #ca8a04;
+}
+
+/* Danger / Caution */
+.void-md .danger,
+.void-md .caution {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.void-md .danger .custom-block-title,
+.void-md .caution .custom-block-title {
+  color: #ef4444;
+}
+
+/* Details (collapsible) */
+.void-md details.custom-block {
+  cursor: pointer;
+}
+
+.void-md details.custom-block summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.void-md details.custom-block[open] summary {
+  margin-bottom: 0.5em;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .void-md .tip {
+    background: rgba(16, 185, 129, 0.12);
+  }
+  :root:not([data-theme='light']) .void-md .info,
+  :root:not([data-theme='light']) .void-md .note {
+    background: rgba(59, 130, 246, 0.12);
+  }
+  :root:not([data-theme='light']) .void-md .warning,
+  :root:not([data-theme='light']) .void-md .important {
+    background: rgba(234, 179, 8, 0.12);
+  }
+  :root:not([data-theme='light']) .void-md .warning .custom-block-title,
+  :root:not([data-theme='light']) .void-md .important .custom-block-title {
+    color: #eab308;
+  }
+  :root:not([data-theme='light']) .void-md .danger,
+  :root:not([data-theme='light']) .void-md .caution {
+    background: rgba(239, 68, 68, 0.12);
+  }
+}
+
+:root[data-theme='dark'] .void-md .tip {
+  background: rgba(16, 185, 129, 0.12);
+}
+:root[data-theme='dark'] .void-md .info,
+:root[data-theme='dark'] .void-md .note {
+  background: rgba(59, 130, 246, 0.12);
+}
+:root[data-theme='dark'] .void-md .warning,
+:root[data-theme='dark'] .void-md .important {
+  background: rgba(234, 179, 8, 0.12);
+}
+:root[data-theme='dark'] .void-md .warning .custom-block-title,
+:root[data-theme='dark'] .void-md .important .custom-block-title {
+  color: #eab308;
+}
+:root[data-theme='dark'] .void-md .danger,
+:root[data-theme='dark'] .void-md .caution {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* GitHub Alerts */
+.void-md .github-alert {
+  border-left-width: 4px;
+}

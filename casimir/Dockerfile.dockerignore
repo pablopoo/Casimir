@@ -1,0 +1,11 @@
+.git
+.local
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/.dev.vars
+**/*.pem
+**/*.key
+**/.wrangler
+**/coverage

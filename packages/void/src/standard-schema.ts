@@ -1,0 +1,53 @@
+/**
+ * Standard Schema V1 types, inlined from the spec.
+ * https://github.com/standard-schema/standard-schema
+ *
+ * Per the spec's design, libraries may copy these types directly
+ * to avoid requiring `@standard-schema/spec` as a dependency.
+ */
+
+export type StandardSchemaV1<Input = unknown, Output = Input> = {
+  readonly '~standard': StandardSchemaV1.Props<Input, Output>;
+};
+
+export declare namespace StandardSchemaV1 {
+  type Props<Input = unknown, Output = Input> = {
+    readonly version: 1;
+    readonly vendor: string;
+    readonly validate: (value: unknown) => Result<Output> | Promise<Result<Output>>;
+    readonly types?: Types<Input, Output> | undefined;
+  };
+
+  type Result<Output> = SuccessResult<Output> | FailureResult;
+
+  type SuccessResult<Output> = {
+    readonly value: Output;
+    readonly issues?: undefined;
+  };
+
+  type FailureResult = {
+    readonly issues: ReadonlyArray<Issue>;
+  };
+
+  type Issue = {
+    readonly message: string;
+    readonly path?: ReadonlyArray<PropertyKey | PathSegment> | undefined;
+  };
+
+  type PathSegment = {
+    readonly key: PropertyKey;
+  };
+
+  type Types<Input = unknown, Output = Input> = {
+    readonly input: Input;
+    readonly output: Output;
+  };
+
+  type InferInput<Schema extends StandardSchemaV1> = NonNullable<
+    Schema['~standard']['types']
+  >['input'];
+
+  type InferOutput<Schema extends StandardSchemaV1> = NonNullable<
+    Schema['~standard']['types']
+  >['output'];
+}

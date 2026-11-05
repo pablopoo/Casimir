@@ -1,0 +1,294 @@
+/* Void Markdown — Prose Typography */
+
+.void-md {
+  --vmd-font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --vmd-font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  --vmd-text: #1a1a2e;
+  --vmd-text-muted: #64748b;
+  --vmd-link: #2563eb;
+  --vmd-link-hover: #1d4ed8;
+  --vmd-border: #e2e8f0;
+  --vmd-bg-soft: #f8fafc;
+  --vmd-line-height: 1.75;
+
+  font-family: var(--vmd-font-body);
+  color: var(--vmd-text);
+  line-height: var(--vmd-line-height);
+  word-wrap: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .void-md {
+    --vmd-text: #e2e8f0;
+    --vmd-text-muted: #94a3b8;
+    --vmd-link: #60a5fa;
+    --vmd-link-hover: #93bbfd;
+    --vmd-border: #334155;
+    --vmd-bg-soft: #1e293b;
+  }
+}
+
+:root[data-theme='dark'] .void-md {
+  --vmd-text: #e2e8f0;
+  --vmd-text-muted: #94a3b8;
+  --vmd-link: #60a5fa;
+  --vmd-link-hover: #93bbfd;
+  --vmd-border: #334155;
+  --vmd-bg-soft: #1e293b;
+}
+
+/* Headings */
+.void-md h1,
+.void-md h2,
+.void-md h3,
+.void-md h4,
+.void-md h5,
+.void-md h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.void-md h1 {
+  font-size: 2em;
+  margin-top: 0;
+}
+.void-md h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--vmd-border);
+}
+.void-md h3 {
+  font-size: 1.25em;
+}
+.void-md h4 {
+  font-size: 1em;
+}
+
+/* Paragraphs */
+.void-md p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+/* Links */
+.void-md a {
+  color: var(--vmd-link);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.void-md a:hover {
+  color: var(--vmd-link-hover);
+  text-decoration: underline;
+}
+
+/* Lists */
+.void-md ul,
+.void-md ol {
+  padding-left: 1.5em;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.void-md li {
+  margin-bottom: 0.25em;
+}
+
+.void-md li > p {
+  margin-bottom: 0.5em;
+}
+
+/* Blockquotes */
+.void-md blockquote {
+  margin: 0 0 1em;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--vmd-border);
+  color: var(--vmd-text-muted);
+}
+
+.void-md blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+/* Tables */
+.void-md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+  display: block;
+  overflow-x: auto;
+}
+
+.void-md th,
+.void-md td {
+  padding: 0.5em 1em;
+  border: 1px solid var(--vmd-border);
+  text-align: left;
+}
+
+.void-md th {
+  font-weight: 600;
+  background: var(--vmd-bg-soft);
+}
+
+/* Inline code */
+.void-md :not(pre) > code {
+  font-family: var(--vmd-font-mono);
+  font-size: 0.875em;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: var(--vmd-bg-soft);
+  border: 1px solid var(--vmd-border);
+}
+
+/* Horizontal rule */
+.void-md hr {
+  border: none;
+  border-top: 1px solid var(--vmd-border);
+  margin: 2em 0;
+}
+
+/* Images */
+.void-md img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Strong / emphasis */
+.void-md strong {
+  font-weight: 600;
+}
+
+/* Anchor links */
+.void-md .header-anchor {
+  float: left;
+  margin-left: -0.87em;
+  padding-right: 0.23em;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.void-md h1:hover .header-anchor,
+.void-md h2:hover .header-anchor,
+.void-md h3:hover .header-anchor,
+.void-md h4:hover .header-anchor,
+.void-md h5:hover .header-anchor,
+.void-md h6:hover .header-anchor {
+  opacity: 1;
+}
+
+/* Task lists */
+.void-md ul.contains-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.void-md .task-list-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+
+.void-md .task-list-item input[type='checkbox'] {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Nested task lists */
+.void-md .task-list-item ul.contains-task-list {
+  margin-top: 0.25em;
+}
+
+/* Keyboard input */
+.void-md kbd {
+  font-family: var(--vmd-font-mono);
+  font-size: 0.875em;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--vmd-border);
+  box-shadow: 0 1px 0 var(--vmd-border);
+  background: var(--vmd-bg-soft);
+}
+
+/* Highlighted text */
+.void-md mark {
+  background: rgba(234, 179, 8, 0.3);
+  padding: 0.1em 0.2em;
+  border-radius: 2px;
+  color: inherit;
+}
+
+/* Definition lists */
+.void-md dl {
+  margin-bottom: 1em;
+}
+
+.void-md dt {
+  font-weight: 600;
+  margin-top: 0.5em;
+}
+
+.void-md dd {
+  margin-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Abbreviations */
+.void-md abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+/* Subscript / Superscript */
+.void-md sub,
+.void-md sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.void-md sup {
+  top: -0.5em;
+}
+
+.void-md sub {
+  bottom: -0.25em;
+}
+
+/* Footnotes */
+.void-md section.footnotes {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--vmd-border);
+  font-size: 0.875em;
+  color: var(--vmd-text-muted);
+}
+
+.void-md .footnote-ref a {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+  margin-left: 0.1em;
+}
+
+.void-md .footnote-backref {
+  font-family: initial;
+}
+
+/* Table of contents */
+.void-md .table-of-contents {
+  margin-bottom: 1em;
+}
+
+.void-md .table-of-contents ul {
+  list-style: none;
+  padding-left: 1em;
+}
+
+.void-md .table-of-contents > ul {
+  padding-left: 0;
+}
