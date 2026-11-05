@@ -1,8 +1,8 @@
 {
   "project": "Casimir",
   "status": "experimental source preparation; not a published release",
-  "productSourceCommit": "ee3224e471d65a989d19d28b38079a967228ff6f",
-  "productSourceTree": "3ff3f6d8c5902cfd8eb34d52c707389f429b7cdd",
+  "productSourceCommit": "c450d501d89612388079b939060bed205c575af1",
+  "productSourceTree": "a1ac1f3e1415e6272455b8cfac6c3bfdf32e76e2",
   "upstream": {
     "repository": "https://github.com/voidzero-dev/void",
     "examinedVersion": "1.1.11",

@@ -1378,7 +1378,7 @@ packages:
     version: 1.1.11
 
   '@void/platform@file:sdk/void-platform-1.1.11.tgz':
-    resolution: {integrity: sha512-oGS8TsEzyt6NzG5zjGTNgyJ43FnQ8KeOQM9K4M8EF8rlVa/Efm5/mq1qhrrobMQJXMWpQKwAChDR0UqccNMUeg==, tarball: file:sdk/void-platform-1.1.11.tgz}
+    resolution: {integrity: sha512-+nzMIIlYic66tavzGGWUVA0kSv7L6q9TT+a6j0YtfXYuoZAj8QJJzNUuulAab3AC/9t5TRcJFCU0+kk2RGyECA==, tarball: file:sdk/void-platform-1.1.11.tgz}
     version: 1.1.11
 
   '@void/react@file:sdk/void-react-1.1.11.tgz':
