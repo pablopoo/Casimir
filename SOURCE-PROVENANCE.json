@@ -1,6 +1,6 @@
 {
   "project": "Casimir",
-  "status": "experimental source preparation; not a published release",
+  "status": "experimental developer preview; source publication, no prebuilt release",
   "productSourceCommit": "9653a35ef0bdad4505f74e19587a4932134dd56c",
   "productSourceTree": "f764bf76bed7ae12d26d59c4d8bb5d1283886d1f",
   "upstream": {

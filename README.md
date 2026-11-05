@@ -4,7 +4,7 @@ Casimir is an experimental self-hosted platform for publishing internal apps
 with the Void SDK and managing them through the reused platform console.
 It runs its tested Node/SQLite application profile on a Linux Docker server.
 
-**Status: developer preview.** The bounded install → SDK deployment → browser
+**Status: experimental developer preview.** The bounded install → SDK deployment → browser
 write → app update → backup → independent restore → compatible upgrade workflow
 has been exercised. Full Void feature parity, multiuser operation, arbitrary
 applications and production readiness are still open. The Casimir branding,
