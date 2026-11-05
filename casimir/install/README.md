@@ -216,9 +216,9 @@ exposure is never automatic.
 
 ## SDK consumer and source builds
 
-Building from the source tree requires Docker Buildx/BuildKit so the
-Dockerfile-specific `.dockerignore` is honored; the C1 runtime bootstrap installs
-Docker Engine and Compose but not `docker-buildx-plugin`.
+The clean-source commands below pass an explicit Git archive as the build
+context and work with Docker's legacy builder and BuildKit. They preserve the
+root build-agent ignore policy; no Buildx plugin is required for that workflow.
 
 `reference-app/` contains the fixed notes application, packed fork SDK archives
 and its exact pnpm lock. The tooling image includes the prepared offline cache
@@ -231,6 +231,42 @@ Set `NODE_EXTRA_CA_CERTS` to the public CA certificate path inside the Docker
 developer container. It never needs the Docker socket or server state. New
 dependency graphs require explicit separate cache preparation.
 Native `vp preview` is unsupported; the deployed reference app is the native gate.
+
+For a fresh offline consumer, use writable copies of **both** shipped caches
+and keep the image's default home directory. This profile was verified from an
+empty workspace with networking disabled; the earlier direct-cache profile was
+not qualified. From a verified extracted C1 bundle, the following disposable
+check installs the fixed graph and loads native SQLite. C1 uses the same image
+for the lifecycle and tooling roles, so `bootstrap.txt` supplies its image ID.
+It requires no Docker socket or credentials inside the developer container.
+
+```sh
+TOOLING_IMAGE="$(sed -n '2p' bootstrap.txt)"
+docker run --rm --pull=never --network none --user 1000:1000 \
+  --cap-drop ALL --security-opt no-new-privileges \
+  --memory 4g --memory-swap 4g --cpus 2 --pids-limit 512 \
+  --mount "type=bind,src=$PWD/reference-app,dst=/bundle/reference-app,readonly" \
+  --tmpfs /workspace:rw,exec,nosuid,nodev,size=3g,uid=1000,gid=1000,mode=0700 \
+  --entrypoint sh -i "$TOOLING_IMAGE" -s <<'CONSUMER'
+set -eu
+mkdir -p /workspace/app /workspace/store /workspace/cache
+cp -R /bundle/reference-app/. /workspace/app/
+cp -R /opt/casimir-client-store/. /workspace/store/
+cp -R /home/node/.cache/pnpm-client/. /workspace/cache/
+export PNPM_CONFIG_STORE_DIR=/workspace/store
+export PNPM_CONFIG_CACHE_DIR=/workspace/cache
+cd /workspace/app
+pnpm install --offline --frozen-lockfile --ignore-scripts
+pnpm rebuild better-sqlite3
+node --input-type=module -e 'import Database from "better-sqlite3"; const db=new Database(":memory:"); if(db.prepare("select 42 n").get().n!==42)process.exit(1); db.close(); console.log("native_driver_loaded");'
+CONSUMER
+```
+
+This check discards its RAM workspace on exit. For publishing, retain the app
+workspace and writable cache copies in a developer container, enable access to
+your Casimir HTTPS origin, and supply the private client environment and public
+CA described above. Run the connect/deploy commands below in that container.
+
 
 For the bundled reference app, the tested C1 sample uses the `casimir-reference`
 project slug and these SDK commands (replace the fixture control URL with the

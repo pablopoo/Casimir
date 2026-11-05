@@ -1,0 +1,95 @@
+{
+  "fixtureData": "Synthetic examples only",
+  "surface": "Actual Casimir self-hosted console adapted from Void and SDK notes app",
+  "captureDates": [
+    "2026-11-05"
+  ],
+  "builtSourceRevision": "10f3b7b7555aa4bd3614f6e6792a88437af9e801",
+  "controlImageId": "sha256:6b55a7fcd17200e83b877514eb567a08e14cf2af7fdba1436f37aca0d803e3a7",
+  "captureEnvironment": "Controlled pinned Docker29.9.1/Compose5.6.0 nested installation; no TLS bypass",
+  "images": [
+    {
+      "file": "assets/console-setup.png",
+      "bytes": 32209,
+      "sha256": "4b3e08b991859a32ccaf26030acb6e28e7c0f3416d588398a6331db35efc4b0a",
+      "width": 1440,
+      "height": 1000,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    },
+    {
+      "file": "assets/console-confirm.png",
+      "bytes": 42129,
+      "sha256": "e28330ff085cef7583d5465a3ab37575ea0a5448609c80d24a3a939e5a01b65c",
+      "width": 1440,
+      "height": 1000,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    },
+    {
+      "file": "assets/console-login.png",
+      "bytes": 21978,
+      "sha256": "18f0add2efd294ab280b4b126871c2e56a7abd11175507cda64501ce3f9428a6",
+      "width": 1440,
+      "height": 1000,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    },
+    {
+      "file": "assets/console-dashboard.png",
+      "bytes": 97250,
+      "sha256": "7f8ad2fb947d279f3409486db6a31e978f6a74b25a8023ebac4d6a0d9872efa7",
+      "width": 1440,
+      "height": 1070,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    },
+    {
+      "file": "assets/console-projects.png",
+      "bytes": 56273,
+      "sha256": "f6923ee5b2201a7a466b22f99dc72ed5382b4b0edd25e186d0ed6dff4b416f09",
+      "width": 1440,
+      "height": 1000,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    },
+    {
+      "file": "assets/console-deployments.png",
+      "bytes": 58707,
+      "sha256": "78b5510ac4c5cf598328e451c4460768576647dcc6ada9a724246e4a72a4aeeb",
+      "width": 1440,
+      "height": 1000,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    },
+    {
+      "file": "assets/notes-v1-saved.png",
+      "bytes": 17613,
+      "sha256": "65161e5593ce3aa8008a5487f1780f3c0ca19f93f63dbe4486749dc536ccc038",
+      "width": 1440,
+      "height": 1000,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    },
+    {
+      "file": "assets/notes-current.png",
+      "bytes": 21398,
+      "sha256": "3a58492c95678225711ec913547e92cbe878ea3a61768b968ed6280babad8d58",
+      "width": 1440,
+      "height": 1000,
+      "pixelsEdited": false,
+      "captureDate": "2026-11-05"
+    }
+  ],
+  "reportRendering": {
+    "desktopViewportWidth": 1440,
+    "mobileViewportWidth": 390,
+    "allEightImagesLoaded": true,
+    "horizontalOverflow": false,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "cookies": 0,
+    "network": "offline",
+    "rootVisualReview": "passed unchanged original captures and both report layouts"
+  }
+}

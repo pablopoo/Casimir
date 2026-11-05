@@ -7,9 +7,15 @@ It runs its tested Node/SQLite application profile on a Linux Docker server.
 **Status: developer preview.** The bounded install → SDK deployment → browser
 write → app update → backup → independent restore → compatible upgrade workflow
 has been exercised. Full Void feature parity, multiuser operation, arbitrary
-applications and production readiness are still open. The latest Casimir branding
-passed focused source checks; its fresh standalone build/UI qualification is
-pending. This source snapshot does not include a prebuilt release.
+applications and production readiness are still open. The Casimir branding,
+fresh installation, administrator enrollment, normal OIDC sign-in, SDK publishing
+and data-preserving app update have been verified in controlled staging.
+Fresh offline SDK preparation also passed using writable copies of the shipped
+caches. Follow the verified developer-container profile in the installation guide. This source snapshot does not include a prebuilt release.
+
+See the [illustrated user walkthrough](docs/casimir-walkthrough/index.html) or its
+[Markdown version](docs/casimir-walkthrough/WALKTHROUGH.md) for actual Casimir
+screenshots and the install → publish → use → update cycle.
 
 ## Install on your own server
 

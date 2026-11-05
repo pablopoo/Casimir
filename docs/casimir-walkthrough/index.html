@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Install the private Casimir preview, publish an app with the Void SDK, and review it in the Casimir console.">
+  <title>Casimir · From an App Idea to a Working Internal App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <p class="eyebrow">A short guide to using Casimir</p>
+      <h1>From an app idea to a working internal app</h1>
+      <p class="dek">Install the private preview, publish an internal app with the Void SDK, use it in a browser, and review the same app in the Casimir console, adapted from Void.</p>
+      <p class="cycle-label">Prepare <span>→</span> Publish <span>→</span> Open <span>→</span> Use <span>→</span> Update</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Page sections">
+      <h2>On this page</h2>
+      <ol>
+        <li><a href="#about">What Casimir is</a></li>
+        <li><a href="#cycle">The publishing cycle</a></li>
+        <li><a href="#company">Getting started at work</a></li>
+        <li><a href="#publish">Publish your app</a></li>
+        <li><a href="#use">Open the app &amp; screenshots</a></li>
+        <li><a href="#manage">Review apps in the console</a></li>
+        <li><a href="#update">Updates and recovery</a></li>
+        <li><a href="#scope">What this preview covers</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="about">
+        <div class="section-heading">
+          <h2>What Casimir is</h2>
+          <p>Casimir is a self-hosted app platform in private preview. It explores a way for a company to publish and run internal applications on infrastructure the company manages, while developers keep using the Void SDK workflow. Administrators sign in to the Casimir console, adapted from Void.</p>
+        </div>
+        <div class="summary-grid">
+          <article class="card"><span class="tag">Current demo</span><h3>A notes app</h3><p>The demonstrated app lets a person write a short note, save it, and see it in a list.</p></article>
+          <article class="card"><span class="tag">Publisher</span><h3>Prepare and publish</h3><p>A developer uses the existing SDK workflow to publish an app artifact inside the company’s Casimir project.</p></article>
+          <article class="card"><span class="tag">Continuity</span><h3>Keep saved data</h3><p>The demonstrated app update kept its notes. Earlier lifecycle checks also exercised backup, independent restore and a compatible platform upgrade.</p></article>
+        </div>
+      </section>
+
+      <section id="cycle">
+        <div class="section-heading">
+          <h2>The publishing cycle</h2>
+          <p>The focus here is using Casimir to publish an app. It is not a guide to publishing Casimir itself.</p>
+        </div>
+        <figure class="cycle-diagram">
+          <svg viewBox="0 0 1020 250" role="img" aria-labelledby="cycle-title cycle-desc" xmlns="http://www.w3.org/2000/svg">
+            <title id="cycle-title">Prepare, publish, open, use, and update an app</title>
+            <desc id="cycle-desc">A developer prepares a notes app with the existing SDK workflow, publishes it to the company Casimir project, opens the secure app link, saves a note, and publishes an update. The updated app keeps the saved note.</desc>
+            <defs>
+              <marker id="flow-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#087f78"/></marker>
+              <style>
+                .node{fill:#fff;stroke:#b9d6d0;stroke-width:2;rx:14}.soft{fill:#e8f6f3;stroke:#65b9aa}.node-title{font:700 17px system-ui,sans-serif;fill:#183238}.node-copy{font:14px system-ui,sans-serif;fill:#52666a}.flow{fill:none;stroke:#087f78;stroke-width:3;marker-end:url(#flow-arrow)}.loop{fill:none;stroke:#6c8584;stroke-width:2.3;stroke-dasharray:6 5;marker-end:url(#flow-arrow)}.loop-label{font:700 13px system-ui,sans-serif;fill:#52666a}
+              </style>
+            </defs>
+            <rect class="node soft" x="20" y="45" width="175" height="100"/>
+            <text class="node-title" x="107" y="78" text-anchor="middle">Prepare</text>
+            <text class="node-copy" x="107" y="103" text-anchor="middle">Developer uses the</text>
+            <text class="node-copy" x="107" y="123" text-anchor="middle">existing SDK workflow</text>
+
+            <rect class="node" x="225" y="45" width="175" height="100"/>
+            <text class="node-title" x="312" y="78" text-anchor="middle">Publish</text>
+            <text class="node-copy" x="312" y="103" text-anchor="middle">App goes to the</text>
+            <text class="node-copy" x="312" y="123" text-anchor="middle">company project</text>
+
+            <rect class="node soft" x="430" y="45" width="175" height="100"/>
+            <text class="node-title" x="517" y="78" text-anchor="middle">Open</text>
+            <text class="node-copy" x="517" y="103" text-anchor="middle">Visitor opens the</text>
+            <text class="node-copy" x="517" y="123" text-anchor="middle">secure app link</text>
+
+            <rect class="node" x="635" y="45" width="175" height="100"/>
+            <text class="node-title" x="722" y="78" text-anchor="middle">Use</text>
+            <text class="node-copy" x="722" y="103" text-anchor="middle">Write a note;</text>
+            <text class="node-copy" x="722" y="123" text-anchor="middle">save it to the list</text>
+
+            <rect class="node soft" x="840" y="45" width="160" height="100"/>
+            <text class="node-title" x="920" y="78" text-anchor="middle">Update</text>
+            <text class="node-copy" x="920" y="103" text-anchor="middle">Publish a change;</text>
+            <text class="node-copy" x="920" y="123" text-anchor="middle">notes remain</text>
+
+            <path class="flow" d="M195 95 H218"/>
+            <path class="flow" d="M400 95 H423"/>
+            <path class="flow" d="M605 95 H628"/>
+            <path class="flow" d="M810 95 H833"/>
+            <path class="loop" d="M920 145 V195 H517 V153"/>
+            <text class="loop-label" x="718" y="188" text-anchor="middle">Refresh the app to see the update with saved data</text>
+          </svg>
+          <figcaption>A company administrator makes the service and project available. The developer prepares and publishes the app; a visitor opens its secure link and uses it. The app runs on company-managed infrastructure, where its saved data remains between visits. The developer can publish an update, and the demonstrated notes remain.</figcaption>
+        </figure>
+      </section>
+
+      <section id="company">
+        <div class="section-heading"><h2>Getting started in your company</h2><p>An administrator installs the supplied release on a controlled server, configures separate secure console and app addresses, and connects the company’s OIDC sign-in.</p></div>
+        <ol class="start-list">
+          <li><span>1</span><div><strong>Install the prepared release.</strong> Follow the <a href="INSTALLATION.md">installation steps</a> and the bundled README. This report contains no release archive or credentials.</div></li>
+          <li><span>2</span><div><strong>Open the setup page.</strong> Enter the private code printed by the supported installer command and continue to company sign-in.</div></li>
+          <li><span>3</span><div><strong>Review and confirm the administrator.</strong> Check the identity before granting platform administrator access.</div></li>
+          <li><span>4</span><div><strong>Use normal sign-in afterward.</strong> The controlled trial verified normal SSO in a fresh browser session.</div></li>
+        </ol>
+        <p class="plain-label">These are actual Casimir screens. The code field is empty; the displayed identity is synthetic.</p>
+        <div class="gallery console"><figure><a href="assets/console-setup.png"><img src="assets/console-setup.png" alt="Casimir administrator setup before code entry"></a><figcaption><strong>Open the administrator setup page</strong><a href="assets/console-setup.png">Open full-size screenshot</a></figcaption></figure><figure><a href="assets/console-confirm.png"><img src="assets/console-confirm.png" alt="Synthetic identity review before administrator confirmation"></a><figcaption><strong>Review the account before confirming access</strong><a href="assets/console-confirm.png">Open full-size screenshot</a></figcaption></figure></div>
+        <div class="gallery console"><figure><a href="assets/console-login.png"><img src="assets/console-login.png" alt="Normal Casimir sign-in page"></a><figcaption><strong>Use normal company sign-in after setup</strong><a href="assets/console-login.png">Open full-size screenshot</a></figcaption></figure></div>
+        <div class="notice"><strong>One operator and one project.</strong><p>This preview demonstrates a trusted operator and shared project. Multiuser company operation and the complete management feature set remain separate verification work.</p></div>
+      </section>
+
+      <section id="publish">
+        <div class="section-heading"><h2>Publish your app</h2><p>A developer prepares the app with the bundled Void SDK and publishes it to the company’s Casimir project. The administrator supplies the server address, project and private publishing access.</p></div>
+        <div class="card publish-card"><ol><li>Prepare the app using the release’s SDK instructions.</li><li>Publish the app to the company project.</li><li>Share the secure app address inside the company.</li></ol><p>The demonstrated app is a small notes tool. Publishing remains a developer workflow. Use the instructions for the exact reviewed bundle.</p></div>
+      </section>
+
+      <section id="use">
+        <div class="section-heading"><h2>Open and use the app</h2><p>Open the secure app address, enter a note and save it. The note appears in the list and remains after refresh. The developer then published an updated heading while retaining the saved note, and a second note was saved.</p></div>
+        <p class="plain-label">The notes are synthetic demonstration data.</p><div class="gallery console"><figure><a href="assets/notes-v1-saved.png"><img src="assets/notes-v1-saved.png" alt="First synthetic note saved in app v1"></a><figcaption><strong>Save a note in the first published version</strong><a href="assets/notes-v1-saved.png">Open full-size screenshot</a></figcaption></figure><figure><a href="assets/notes-current.png"><img src="assets/notes-current.png" alt="Updated notes app retaining two synthetic saved notes"></a><figcaption><strong>Published app v2; saved notes remain</strong><a href="assets/notes-current.png">Open full-size screenshot</a></figcaption></figure></div>
+      </section>
+
+      <section id="manage">
+        <div class="section-heading"><h2>Review apps in the company console</h2><p>The administrator sees the same SDK-published project and deployments. The reused interface now displays Casimir branding.</p></div>
+        <div class="gallery console"><figure><a href="assets/console-dashboard.png"><img src="assets/console-dashboard.png" alt="Casimir dashboard with the SDK-published project and deployments"></a><figcaption><strong>Dashboard: real project and deployment records</strong><a href="assets/console-dashboard.png">Open full-size screenshot</a></figcaption></figure><figure><a href="assets/console-projects.png"><img src="assets/console-projects.png" alt="Casimir Projects screen with the notes project and its app URL"></a><figcaption><strong>Projects: find the app and its secure address</strong><a href="assets/console-projects.png">Open full-size screenshot</a></figcaption></figure><figure><a href="assets/console-deployments.png"><img src="assets/console-deployments.png" alt="Casimir Deployments screen with live and retained releases"></a><figcaption><strong>Deployments: inspect the live and retained releases</strong><a href="assets/console-deployments.png">Open full-size screenshot</a></figcaption></figure></div>
+        <div class="notice"><strong>What these screens verify.</strong><p>Enrollment, sign-in, these views, normal sign-in were exercised. Traffic metrics are visibly unavailable. Other navigation items retain their own functionality and verification requirements.</p></div>
+      </section>
+
+      <section id="update">
+        <div class="section-heading"><h2>Updates and recovery</h2><p>An earlier controlled lifecycle trial exercised encrypted backup, independent restore and one compatible platform upgrade with retained notes. Those checks were separate from this fresh branded installation and were not repeated for these screenshots. Use the lifecycle commands shipped with the reviewed bundle and keep backup keys private.</p></div>
+        <div class="notice"><strong>Administrator lifecycle work.</strong><p>Use the supported lifecycle commands in the supplied release. This report describes the verified controlled path; it does not establish a general recovery or production guarantee.</p></div>
+      </section>
+
+      <section id="scope">
+        <div class="section-heading"><h2>What this preview covers</h2><p>A real notes app and the Casimir operational console, demonstrated with one trusted operator and one shared project.</p></div>
+        <div class="two-column"><article class="card"><span class="tag">Verified path</span><h3>Publish, use and review</h3><ul><li>Publish with the Void SDK and use the secure app link.</li><li>Keep saved notes through the demonstrated app update.</li><li>Enroll and sign in through reused company OIDC pages.</li><li>Review the actual project and deployments, and sign in normally.</li></ul></article><article class="card future"><span class="tag">Still open</span><h3>Full management parity</h3><p>Multiuser operation, arbitrary application compatibility, the remaining management actions and production qualification are outside this demonstrated path. The separate optional account dashboard is another upstream surface.</p></article></div>
+        <div class="limits"><strong>Scope</strong><p>All screenshot data is synthetic. Images are unchanged captures from successive controlled checks, not one uninterrupted recording. This offline report does not promise a service is reachable from the reader’s machine, and no website or release has been published.</p></div>
+        <p class="source-link">See <a href="SOURCES.md">evidence and scope</a>, <a href="INSTALLATION.md">installation steps</a>, or the <a href="WALKTHROUGH.md">Markdown walkthrough</a>.</p>
+      </section>
+    </main>
+  </div>
+  <footer class="footer">Casimir app-publishing walkthrough · Offline report</footer>
+</body>
+</html>

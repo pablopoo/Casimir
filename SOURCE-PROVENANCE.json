@@ -24,8 +24,19 @@
   "validation": {
     "focusedBrandingTestsPassed": 72,
     "apiTypecheck": "passed",
-    "freshBrandedStandaloneRuntime": "pending",
+    "freshBrandedStandaloneRuntime": "passed controlled pinned nested install, real OIDC enrollment/sign-in, SDK deployment/browser writes/app update",
     "fullVoidParity": "unfinished",
-    "fullUpstreamSuiteGreen": false
+    "fullUpstreamSuiteGreen": false,
+    "actualGeneratedAssetsHttpTestsPassed": 8,
+    "coldOfflineSdkConsumer": "passed shipped image, fresh bundle-only workspace, copied writable caches/default HOME, network disabled, no credentials; 11770 files verified and native SQLite loaded",
+    "sdkToolingProvenance": "v1 used source-built runtime-toolchain; v2 used shipped tooling with its warm workspace; independent cold shipped-tooling preparation passed",
+    "offlineWalkthroughRender": "passed desktop1440/mobile390, 8 images, no page/console errors or page overflow"
+  },
+  "qualificationBuild": {
+    "publicSourceRevision": "10f3b7b7555aa4bd3614f6e6792a88437af9e801",
+    "controlImageId": "sha256:6b55a7fcd17200e83b877514eb567a08e14cf2af7fdba1436f37aca0d803e3a7",
+    "imageIdKind": "local Docker image ID, not registry digest",
+    "environment": "controlled pinned Docker29.9.1/Compose5.6.0 nested installation",
+    "documentationOnlyChangesAfterBuild": true
   }
 }
