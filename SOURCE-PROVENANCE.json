@@ -19,6 +19,11 @@
       "runtime state, secrets, backups and dependency caches",
       "inherited deployment/publication workflows and CODEOWNERS",
       "upstream internal maintainer/design archive"
+    ],
+    "publicSourceAdjustments": [
+      "Casimir entry documentation, quickstart, walkthrough and provenance",
+      "Private-file and internal-record exclusions",
+      "Own void SDK integrity synchronized with its four added public walkthrough Markdown files"
     ]
   },
   "validation": {
@@ -37,6 +42,35 @@
     "controlImageId": "sha256:6b55a7fcd17200e83b877514eb567a08e14cf2af7fdba1436f37aca0d803e3a7",
     "imageIdKind": "local Docker image ID, not registry digest",
     "environment": "controlled pinned Docker29.9.1/Compose5.6.0 nested installation",
-    "documentationOnlyChangesAfterBuild": true
+    "documentationOnlyChangesAfterBuild": false,
+    "historical": true,
+    "subsequentChanges": [
+      "User documentation",
+      "One own SDK integrity entry; external dependency graph unchanged"
+    ]
+  },
+  "publicFolderQualification": {
+    "date": "2026-11-05",
+    "testSourceRevision": "e133cd3beea4d843bc08b04ab4c303b2b56d569c",
+    "sourceKind": "Clean local Git snapshot of public-folder files; not a published release",
+    "environment": "Existing Linux amd64 staging VM; new pinned Docker29.9.1 / Compose5.6.0 classic overlay2 nested store",
+    "initialStoreEmpty": true,
+    "priorProductImagesOrCachesImported": false,
+    "retry": "Reused only this test own layers after verified local SDK checksum correction",
+    "buildAndPackage": "passed canonical source-build and package commands",
+    "standaloneBundleVersion": "c1.0",
+    "controlImageId": "sha256:ab6f02200ce5a523ee2dba77da4ac66ab3d5e2b74ea2430c1ad15578843104b7",
+    "administratorEnrollmentAndFreshOidcLogin": "passed with synthetic operator-provided identity fixture",
+    "shippedSdkPublish": "passed fresh workspace, copied shipped caches and frozen offline install",
+    "browserWriteAndRefresh": "passed one exact synthetic note; zero page/console errors",
+    "finalOutcome": "ready / serving_verified",
+    "documentationOverlayAfterBuild": [
+      "Quickstart example setting and API-side IdP DNS clarification",
+      "Qualification metadata and README result"
+    ],
+    "cleanVmQualified": false,
+    "hostRebootQualified": false,
+    "newLifecycleOrUpgradePairQualified": false,
+    "fullVoidParity": "unfinished"
   }
 }

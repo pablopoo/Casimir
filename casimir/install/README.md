@@ -6,6 +6,7 @@ Server qualification requires rootful Docker Engine29.9.1, Compose5.6.0, a local
 Unix Docker socket, at least2CPUs/8GiB RAM and20GiB free disk (more for large
 bundles/backups). Node, builds and developer commands run in Docker.
 
+
 The self-hosted console adapts Cloudflare's MIT-licensed Void Platform source;
 the upstream license is included as `LICENSE`. Its adapted syntax-highlighting
 themes have a separate MIT notice in `THIRD_PARTY_NOTICES/remdx-theme-MIT.txt`.
@@ -95,6 +96,8 @@ Void login providers and admission settings; this command does not enact
 `cloudflareAccess` or `appAccess`, non-null protection, or the
 `cloudflare-access` provider. An optional `--identity-policy` file supplies
 trusted IdP network policy and must also be a private 0600 file outside state.
+For OIDC, register the redirect URI `<controlOrigin>/auth/callback` with the
+provider before enrollment.
 
 For example, this OIDC authentication-file shape uses Void's existing
 `connections[].configuration` and `clientSecretEnv` fields:
@@ -230,6 +233,9 @@ workflow. Set `CASIMIR_API_URL` to the same HTTPS origin passed to
 Set `NODE_EXTRA_CA_CERTS` to the public CA certificate path inside the Docker
 developer container. It never needs the Docker socket or server state. New
 dependency graphs require explicit separate cache preparation.
+The state `api.env` includes both `DATABASE_URL` and `CASIMIR_TOKEN`. Extract
+only the token for the private publisher environment; do not copy or mount this
+file or the installation state into a developer container.
 Native `vp preview` is unsupported; the deployed reference app is the native gate.
 
 For a fresh offline consumer, use writable copies of **both** shipped caches

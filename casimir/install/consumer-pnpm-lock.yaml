@@ -2409,7 +2409,7 @@ packages:
         optional: true
 
   void@file:sdk/void-1.1.11.tgz:
-    resolution: {integrity: sha512-Nt3IpYknZBxj2Gs9nMi0oVvz3RHyVrM2ojKkpCmd/pLTIO9IrKdG+vhNfGrukX5/1W3Xn2DxUPJxb0d/zzIfUA==, tarball: file:sdk/void-1.1.11.tgz}
+    resolution: {integrity: sha512-60mKbk5vD5gcVm5Q47FimqD/QTwmZKMhtDDP7asx8QaqQRJwalhSxm5Jj+OJGjDcl5OwIvcsGs2yp0JweC8azw==, tarball: file:sdk/void-1.1.11.tgz}
     version: 1.1.11
     engines: {node: '>=24.21.0'}
     hasBin: true
