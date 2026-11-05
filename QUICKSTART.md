@@ -6,10 +6,12 @@ before installing it; the build fetches dependencies and needs registry access.
 
 ## Prerequisites
 
-- Linux amd64 with rootful Docker Engine **29.9.1**, Compose **5.6.0**, and the
+- Linux amd64 with rootful Docker Engine, the Docker Compose plugin, and the
   classic `overlay2` image store.
-- At least 2 CPUs, 8 GiB RAM and 20 GiB free disk for the supported server
-  profile. Source builds and large bundles need additional resources.
+- At least 8 GiB RAM and 20 GiB free disk for the current server profile.
+  Source builds and large bundles need additional resources.
+- CPU capacity affects build/deployment time and throughput; no measured CPU
+  minimum has been established. Size it for your workload.
 - Two DNS names resolving to the server: one for the control plane and one for
   published apps. Prepare HTTPS certificates trusted by operators and browsers.
   The control and app names must differ; separate ports on one hostname do not
@@ -27,6 +29,15 @@ before installing it; the build fetches dependencies and needs registry access.
 
 Read the [tested support boundary](casimir/install/SUPPORT.md) before using a
 different host or application profile.
+
+### Tested profile and current installer restrictions
+
+Validation used Docker Engine **29.9.1** and Compose **5.6.0**. These are the
+qualified versions so far; broader compatibility has not been established.
+The preview installer currently accepts only that exact pair.
+
+It also rejects hosts with fewer than 2 vCPUs. That conservative check remains
+pending one-vCPU validation; it is not an established hardware minimum.
 
 ## Build and verify the bundle
 
