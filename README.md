@@ -1,28 +1,23 @@
 # Casimir
 
-Casimir is an experimental self-hosted platform for publishing internal apps
-with the Void SDK and managing them through the reused platform console.
-It runs its tested Node/SQLite application profile on a Linux Docker server.
+Casimir gives your company a place to share the small apps your team uses at work.
 
-**Status: experimental developer preview.** The bounded install → SDK deployment → browser
-write → app update → backup → independent restore → compatible upgrade workflow
-has been exercised. Full Void feature parity, multiuser operation, arbitrary
-applications and production readiness are still open. The Casimir branding,
-fresh installation, administrator enrollment, normal OIDC sign-in, SDK publishing
-and data-preserving app update have been verified in controlled staging.
-Fresh offline SDK preparation also passed using writable copies of the shipped
-caches. Follow the verified developer-container profile in the installation guide. This source snapshot does not include a prebuilt release.
+A teammate creates a useful tool, makes it available through Casimir, and
+colleagues open it in their browser. The app and the information it stores stay
+on computers your company controls.
 
-The quickstart source build, fresh install, OIDC sign-in, SDK publishing and
-browser write/refresh were reproduced from the public source in a new isolated
-Docker store on the existing staging VM. Clean-VM and host-reboot qualification
-remain open; see [source provenance](SOURCE-PROVENANCE.json).
+The included example is a shared notes app: write a note, save it, and see it
+when you return.
 
-See the [illustrated user walkthrough](docs/casimir-walkthrough/index.html) or its
-[Markdown version](docs/casimir-walkthrough/WALKTHROUGH.md) for actual Casimir
-screenshots and the install → publish → use → update cycle.
+**Warning: Casimir is an experiment.**
+
+See the [walkthrough](docs/casimir-walkthrough/WALKTHROUGH.md) for pictures of
+someone sharing and using an app with Casimir.
 
 ## Casimir and Void
+
+The current server profile runs Node/SQLite apps on a Linux Docker server.
+It uses the Void SDK and reuses the original management console.
 
 **Casimir brings the Void publishing experience to a fully self-hosted application
 stack.** The management API and console, app execution, platform database,
@@ -76,9 +71,6 @@ DNS, HTTPS certificates and server administration are also operator-managed.
 Source builds fetch dependencies; self-hosted operation does not imply an
 air-gapped build or installation.
 
-This is a bounded developer preview, not a complete replacement for Cloudflare
-or every Void feature. See the [tested support boundary](casimir/install/SUPPORT.md).
-
 ## Install on your own server
 
 Start with the [quickstart](QUICKSTART.md) for the supported source-build,
@@ -111,12 +103,14 @@ use browser sign-in; do not rerun `auth-setup` as a status or update command.
 
 ## Source and contributions
 
+An [offline illustrated walkthrough](docs/casimir-walkthrough/index.html) is also
+included.
+
 This snapshot includes the Casimir adapter, installer, reference app, reused
 management components, SDK/framework source, tests and usage documentation.
 SDK names remain `void` and `@void/*`. Original framework docs under `docs/`
 also describe Cloudflare features; Casimir's operator/support guides define
-this preview's self-hosted scope. The optional upstream account dashboard
-remains a separate surface with incomplete Casimir qualification.
+this preview's self-hosted scope.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) and [TESTING.md](TESTING.md).
 Use synthetic examples; never attach real credentials, dumps or private server
@@ -132,3 +126,25 @@ Adapted syntax-highlighting theme notices remain in
 and are included by the standalone packager. Casimir branding does not imply
 upstream endorsement. [SOURCE-PROVENANCE.json](SOURCE-PROVENANCE.json) identifies
 the product source used for this preparation.
+
+## Experimental status
+
+**Status: experimental developer preview.** The bounded install → SDK deployment → browser
+write → app update → backup → independent restore → compatible upgrade workflow
+has been exercised. Full Void feature parity, multiuser operation, arbitrary
+applications and production readiness are still open. The Casimir branding,
+fresh installation, administrator enrollment, normal OIDC sign-in, SDK publishing
+and data-preserving app update have been verified in controlled staging.
+Fresh offline SDK preparation also passed using writable copies of the shipped
+caches. Follow the verified developer-container profile in the installation guide. This source snapshot does not include a prebuilt release.
+
+The quickstart source build, fresh install, OIDC sign-in, SDK publishing and
+browser write/refresh were reproduced from the public source in a new isolated
+Docker store on the existing staging VM. Clean-VM and host-reboot qualification
+remain open; see [source provenance](SOURCE-PROVENANCE.json).
+
+The optional upstream account dashboard
+remains a separate surface with incomplete Casimir qualification.
+
+This is a bounded developer preview, not a complete replacement for Cloudflare
+or every Void feature. See the [tested support boundary](casimir/install/SUPPORT.md).
